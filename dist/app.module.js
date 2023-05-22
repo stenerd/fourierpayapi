@@ -28,6 +28,7 @@ const ejs_adapter_1 = require("@nestjs-modules/mailer/dist/adapters/ejs.adapter"
 const subscription_module_1 = require("./subscription/subscription.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 const cloudinary_service_1 = require("./cloudinary/cloudinary.service");
+const app_controller_1 = require("./app.controller");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
@@ -93,6 +94,7 @@ AppModule = __decorate([
             subscription_module_1.SubscriptionModule,
             cloudinary_module_1.CloudinaryModule,
         ],
+        controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],
     })
 ], AppModule);

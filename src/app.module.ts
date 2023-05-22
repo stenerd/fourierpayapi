@@ -20,6 +20,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { MulterModule } from '@nestjs/platform-express';
+import { AppController } from './app.controller';
 const config = configuration();
 
 @Module({
@@ -84,6 +85,7 @@ const config = configuration();
     SubscriptionModule,
     CloudinaryModule,
   ],
+  controllers: [AppController],
   providers: [CloudinaryService],
 })
 export class AppModule {}

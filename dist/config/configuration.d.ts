@@ -1,5 +1,5 @@
 declare const _default: () => {
-    PORT: number;
+    PORT: string;
     APP_NAME: string;
     APP_DESC: string;
     APP_VER: string;

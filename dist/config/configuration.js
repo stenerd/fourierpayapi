@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dotenv = require("dotenv");
 dotenv.config();
 exports.default = () => ({
-    PORT: 4000,
+    PORT: process.env.PORT,
     APP_NAME: 'FourierPay',
     APP_DESC: 'Collect fast payment',
     APP_VER: '1.0',

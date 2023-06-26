@@ -14,6 +14,9 @@ export class Withdrawal {
   @Prop({ required: true, default: 0.0 })
   amount: number;
 
+  @Prop({ required: true, default: 0.0 })
+  charges: number;
+
   @Prop({ required: true })
   account_number: string;
 

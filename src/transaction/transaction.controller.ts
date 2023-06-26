@@ -42,7 +42,8 @@ export class TransactionController extends CoreController {
     @Query() query: ViewTransactionDto,
   ) {
     const resp = await this.transactionService.getTransaction(
-      currentUser.role == RoleEnum.SUPERADMIN ? null : currentUser._id,
+      // currentUser.role == RoleEnum.SUPERADMIN ? null : currentUser._id,
+      currentUser._id,
       query,
     );
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);

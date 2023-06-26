@@ -8,6 +8,7 @@ declare const _default: () => {
     DB_USERNAME: string;
     DB_PASSWORD: string;
     FRONTEND_BASEURL: string;
+    ADMIN_EMAIL: string;
     jwt: {
         JWT_AUTH_SECRET: string;
         EXPIRES_IN: string;

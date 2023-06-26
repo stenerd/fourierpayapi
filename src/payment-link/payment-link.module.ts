@@ -11,11 +11,13 @@ import { ExcelService } from 'src/file-processor/excel-processor.service';
 import { PayerSheetSchema } from './models/payer-sheet.model';
 import { PayerSheetRepository } from './repositories/payer_sheet.repository';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { QRCodeModule } from 'src/qrcode/qrcode.module';
 
 @Module({
   imports: [
     UserModule,
     LinkModule,
+    QRCodeModule,
     MongooseModule.forFeature([
       { name: 'PaymentLink', schema: PaymentLinkSchema },
       { name: 'PayerSheet', schema: PayerSheetSchema },

@@ -59,6 +59,9 @@ export class Transaction {
   })
   status?: TransactionStatus;
 
+  @Prop({ default: false })
+  is_charges: boolean;
+
   @Prop()
   payment_date: Date;
 }

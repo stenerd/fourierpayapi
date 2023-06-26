@@ -113,7 +113,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
 
     const payment = await this.newPayment({
       payment_link_id: payment_link._id,
-      amount: dto.amount,
+      amount: payment_link.amount,
       charges: payment_link.charges,
       form: dto.form,
       unique_field: payment_link.unique_field,
@@ -141,7 +141,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
     // );
 
     const trnx_payload = {
-      amount: dto.amount,
+      amount: payment_link.amount,
       reciever_id: payment_link.creator_id,
       payment_link_id: payment_link._id,
       in_entity_id: payment._id,
@@ -153,8 +153,6 @@ export class PaymentService extends CoreService<PaymentRepository> {
     const trnx = await this.transactionService.create({ ...trnx_payload });
 
     await this.updateOne(payment._id, { transaction_id: trnx._id });
-
-    console.log('skjdbv >> ', this.configService.get('PAYSTACK_PUBLIC'))
 
     return {
       ...generate_paystack_payload,
@@ -234,7 +232,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
         const get_reference = await this.transactionService.generateReference();
 
         const superAdmin = await this.userService.findOne({
-          email: 'admin@fourierpay.com',
+          email: this.configService.get('ADMIN_EMAIL'),
         });
 
         const adminWallet = await this.walletService.updateWallet({
@@ -253,6 +251,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
           status: TransactionStatus.PAID,
           out_entity_id: adminWallet._id,
           out_entity: TransactionEntity.WALLET,
+          is_charges: true,
         };
 
         await this.transactionService.create({ ...trnx_payload });

@@ -19,6 +19,7 @@ import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { PaymentLink } from './models/payment-link.model';
+import { QRCodeService } from 'src/qrcode/qrcode.service';
 
 @Injectable()
 export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
@@ -30,6 +31,7 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
     private readonly configService: ConfigService,
     private readonly excelService: ExcelService,
     private readonly cloudinaryService: CloudinaryService,
+    private readonly qRCodeService: QRCodeService,
   ) {
     super(paymentLinkRepository);
   }
@@ -59,6 +61,10 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
       get_link._id,
       this.configService.get('FRONTEND_BASEURL'),
     );
+    const codeQR = await this.qRCodeService.generateQRCode(
+      paymentLinkAttribute.link,
+    );
+    paymentLinkAttribute.qr_code = codeQR;
     await this.paymentLinkRepository.create(paymentLinkAttribute);
     await this.linkService.updateOne(get_link._id, {
       usage: LinkUsageEnum.USED,
@@ -217,6 +223,12 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
         populate: [{ path: 'creator_id' }],
       },
     );
+
+    return resp;
+  }
+
+  async getAllPaymentLink(query: Record<string, any>): Promise<PaymentLink[]> {
+    const resp = await this.paymentLinkRepository.find(query, {}, {});
 
     return resp;
   }

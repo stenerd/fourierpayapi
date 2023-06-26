@@ -21,10 +21,14 @@ import { CloudinaryModule } from './cloudinary/cloudinary.module';
 import { CloudinaryService } from './cloudinary/cloudinary.service';
 import { MulterModule } from '@nestjs/platform-express';
 import { AppController } from './app.controller';
+import { QRCodeModule } from './qrcode/qrcode.module';
+import { JobModule } from './job/job.module';
+import { ScheduleModule } from '@nestjs/schedule';
 const config = configuration();
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -84,6 +88,8 @@ const config = configuration();
     LinkModule,
     SubscriptionModule,
     CloudinaryModule,
+    QRCodeModule,
+    JobModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

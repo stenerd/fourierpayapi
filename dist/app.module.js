@@ -29,12 +29,16 @@ const subscription_module_1 = require("./subscription/subscription.module");
 const cloudinary_module_1 = require("./cloudinary/cloudinary.module");
 const cloudinary_service_1 = require("./cloudinary/cloudinary.service");
 const app_controller_1 = require("./app.controller");
+const qrcode_module_1 = require("./qrcode/qrcode.module");
+const job_module_1 = require("./job/job.module");
+const schedule_1 = require("@nestjs/schedule");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
 AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            schedule_1.ScheduleModule.forRoot(),
             mongoose_1.MongooseModule.forRootAsync({
                 imports: [config_1.ConfigModule],
                 inject: [config_1.ConfigService],
@@ -93,6 +97,8 @@ AppModule = __decorate([
             link_module_1.LinkModule,
             subscription_module_1.SubscriptionModule,
             cloudinary_module_1.CloudinaryModule,
+            qrcode_module_1.QRCodeModule,
+            job_module_1.JobModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

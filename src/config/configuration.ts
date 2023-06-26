@@ -11,7 +11,8 @@ export default () => ({
     'mongodb+srv://ofuzor:ofuzor2018@cluster0.qjl8f.mongodb.net/fourier-pay?retryWrites=true&w=majority',
   DB_USERNAME: '',
   DB_PASSWORD: '',
-  FRONTEND_BASEURL: 'localhost:3000',
+  FRONTEND_BASEURL: 'https://fourierpay.com',
+  ADMIN_EMAIL: 'admin@fourierpay.com',
   jwt: {
     JWT_AUTH_SECRET: 'jwtsecrete',
     EXPIRES_IN: '1d',
@@ -23,8 +24,10 @@ export default () => ({
   RESOLVE_ACCOUNT_ENDPOINT: 'https://api.paystack.co/bank/resolve',
   TRANSFER_RECIPIENT_ENDPOINT: 'https://api.paystack.co/transferrecipient',
   TRANSFER_ENDPOINT: 'https://api.paystack.co/transfer',
-  PAYSTACK_PUBLIC: 'pk_live_28f14c310553dab87cdd338094b6c273a54fb85e',
-  PAYSTACK_SECRET: 'sk_live_8f377c9a51a5e346d5373370af0ac482b2debf09',
+  PAYSTACK_PUBLIC: 'pk_live_b75f0fc44023fe0e3c62cc1ad7731d7aeab44b13',
+  PAYSTACK_SECRET: 'sk_live_eec908f7ad1d9b2b3713a73ea7058b8f9dd0b1da',
+  // PAYSTACK_PUBLIC: 'pk_live_28f14c310553dab87cdd338094b6c273a54fb85e',
+  // PAYSTACK_SECRET: 'sk_live_8f377c9a51a5e346d5373370af0ac482b2debf09',
   // PAYSTACK_PUBLIC: 'pk_test_38a1aa902f0724aef4fb2b4960a01fe961a05705',
   // PAYSTACK_SECRET: 'sk_test_c2337d1a5a01658cab81073d00a0dc7b32f9f230',
   //email

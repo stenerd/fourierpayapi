@@ -20,8 +20,10 @@ export class PaymentLinkFactory {
     }
 
     payment_link.code = code;
-    payment_link.charges =
+    const charges =
       +data.amount >= 2000 ? +data.amount * 0.02 + 100 : +data.amount * 0.02;
+
+    payment_link.charges = charges > 3000 ? 3000 : charges;
     payment_link.link = `${base_url}/pay/${code}`;
     payment_link.creator_id = new Types.ObjectId(user_id);
     payment_link.link_id = new Types.ObjectId(link_id);

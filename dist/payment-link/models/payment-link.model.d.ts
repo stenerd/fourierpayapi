@@ -49,6 +49,7 @@ export declare class PaymentLink {
     priority_3: string;
     code: string;
     link: string;
+    qr_code: string;
     expected_number_of_payments: number;
     recieved_payment: boolean;
     sheet_uploaded: boolean;

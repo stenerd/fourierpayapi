@@ -9,4 +9,5 @@ export declare class WalletController extends CoreController {
     createWallet(currentUser: IJWTUser, res: Response): Promise<void>;
     walletWithdraw(currentUser: IJWTUser, dto: walletWithdrawalDto, res: Response): Promise<void>;
     getWallet(currentUser: IJWTUser, res: Response): Promise<void>;
+    webhook(res: Response, body: Record<string, any>): Promise<void>;
 }

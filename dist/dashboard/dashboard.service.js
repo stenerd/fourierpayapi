@@ -52,12 +52,12 @@ let DashboardService = class DashboardService {
             .find(Object.assign({}, (user_id ? { reciever_id: user_id } : {})))
             .populate(['transaction_id', 'payment_link_id'])
             .sort({ _id: -1 })
-            .limit(4);
+            .limit(3);
         const recentPaymentLinks = await this.paymentLinkRepository
             .model()
             .find(Object.assign({}, (user_id ? { creator_id: user_id } : {})))
             .sort({ _id: -1 })
-            .limit(4);
+            .limit(7);
         return {
             recentPayments,
             recentPaymentLinks,

@@ -29,6 +29,7 @@ export declare class Withdrawal {
     _id?: any;
     user_id: Types.ObjectId;
     amount: number;
+    charges: number;
     account_number: string;
     bank_name: string;
     name: string;

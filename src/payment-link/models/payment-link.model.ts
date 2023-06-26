@@ -73,6 +73,9 @@ export class PaymentLink {
   @Prop({ required: true, unique: true })
   link: string;
 
+  @Prop({ required: true })
+  qr_code: string;
+
   @Prop({ required: true, default: 0 })
   expected_number_of_payments: number;
 

@@ -20,6 +20,7 @@ const excel_processor_service_1 = require("../file-processor/excel-processor.ser
 const payer_sheet_model_1 = require("./models/payer-sheet.model");
 const payer_sheet_repository_1 = require("./repositories/payer_sheet.repository");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
+const qrcode_module_1 = require("../qrcode/qrcode.module");
 let PaymentLinkModule = class PaymentLinkModule {
 };
 PaymentLinkModule = __decorate([
@@ -27,6 +28,7 @@ PaymentLinkModule = __decorate([
         imports: [
             user_module_1.UserModule,
             link_module_1.LinkModule,
+            qrcode_module_1.QRCodeModule,
             mongoose_1.MongooseModule.forFeature([
                 { name: 'PaymentLink', schema: payment_link_model_1.PaymentLinkSchema },
                 { name: 'PayerSheet', schema: payer_sheet_model_1.PayerSheetSchema },

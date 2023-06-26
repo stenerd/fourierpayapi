@@ -97,6 +97,10 @@ __decorate([
     __metadata("design:type", String)
 ], PaymentLink.prototype, "link", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], PaymentLink.prototype, "qr_code", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ required: true, default: 0 }),
     __metadata("design:type", Number)
 ], PaymentLink.prototype, "expected_number_of_payments", void 0);

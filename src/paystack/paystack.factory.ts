@@ -23,7 +23,7 @@ export class PaystackFactory {
       entity: entity,
       entity_id: payment._id,
       amount: (data.amount + payment_link.charges) * 100,
-      email: user.email,
+      email: `${reference}@fourierpay.com`,
       reference,
       currency: 'NGN',
       metadata: {

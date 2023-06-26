@@ -17,6 +17,8 @@ const transaction_module_1 = require("../transaction/transaction.module");
 const user_module_1 = require("../user/user.module");
 const paystack_module_1 = require("../paystack/paystack.module");
 const withdrawal_module_1 = require("../withdrawal/withdrawal.module");
+const user_model_1 = require("../user/user.model");
+const user_repository_1 = require("../user/user.repository");
 let WalletModule = class WalletModule {
 };
 WalletModule = __decorate([
@@ -26,10 +28,13 @@ WalletModule = __decorate([
             (0, common_1.forwardRef)(() => transaction_module_1.TransactionModule),
             paystack_module_1.PaystackModule,
             withdrawal_module_1.WithdrawalModule,
-            mongoose_1.MongooseModule.forFeature([{ name: 'Wallet', schema: wallet_model_1.WalletSchema }]),
+            mongoose_1.MongooseModule.forFeature([
+                { name: 'Wallet', schema: wallet_model_1.WalletSchema },
+                { name: 'User', schema: user_model_1.UserSchema },
+            ]),
         ],
         controllers: [wallet_controller_1.WalletController],
-        providers: [wallet_service_1.WalletService, wallet_repository_1.WalletRepository],
+        providers: [wallet_service_1.WalletService, wallet_repository_1.WalletRepository, user_repository_1.UserRepository],
         exports: [wallet_service_1.WalletService, wallet_repository_1.WalletRepository],
     })
 ], WalletModule);

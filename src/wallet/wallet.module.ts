@@ -8,6 +8,8 @@ import { TransactionModule } from 'src/transaction/transaction.module';
 import { UserModule } from 'src/user/user.module';
 import { PaystackModule } from 'src/paystack/paystack.module';
 import { WithdrawalModule } from 'src/withdrawal/withdrawal.module';
+import { UserSchema } from 'src/user/user.model';
+import { UserRepository } from 'src/user/user.repository';
 
 @Module({
   imports: [
@@ -15,10 +17,13 @@ import { WithdrawalModule } from 'src/withdrawal/withdrawal.module';
     forwardRef(() => TransactionModule),
     PaystackModule,
     WithdrawalModule,
-    MongooseModule.forFeature([{ name: 'Wallet', schema: WalletSchema }]),
+    MongooseModule.forFeature([
+      { name: 'Wallet', schema: WalletSchema },
+      { name: 'User', schema: UserSchema },
+    ]),
   ],
   controllers: [WalletController],
-  providers: [WalletService, WalletRepository],
+  providers: [WalletService, WalletRepository, UserRepository],
   exports: [WalletService, WalletRepository],
 })
 export class WalletModule {}

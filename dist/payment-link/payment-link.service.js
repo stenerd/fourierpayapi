@@ -23,8 +23,9 @@ const payment_link_repository_1 = require("./repositories/payment-link.repositor
 const payer_sheet_repository_1 = require("./repositories/payer_sheet.repository");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const transaction_enum_1 = require("../transaction/transaction.enum");
+const qrcode_service_1 = require("../qrcode/qrcode.service");
 let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreService {
-    constructor(paymentLinkRepository, payerSheetRepository, paymentLinkFactory, linkService, configService, excelService, cloudinaryService) {
+    constructor(paymentLinkRepository, payerSheetRepository, paymentLinkFactory, linkService, configService, excelService, cloudinaryService, qRCodeService) {
         super(paymentLinkRepository);
         this.paymentLinkRepository = paymentLinkRepository;
         this.payerSheetRepository = payerSheetRepository;
@@ -33,6 +34,7 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
         this.configService = configService;
         this.excelService = excelService;
         this.cloudinaryService = cloudinaryService;
+        this.qRCodeService = qRCodeService;
     }
     async generateCode() {
         const unique_code = (0, code_generator_util_1.GenerateRandomString)(30);
@@ -52,6 +54,8 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
             throw new common_1.BadRequestException('You dont have an available payment link.');
         const code = await this.generateCode();
         const paymentLinkAttribute = this.paymentLinkFactory.createNew(dto, code, user_id, get_link._id, this.configService.get('FRONTEND_BASEURL'));
+        const codeQR = await this.qRCodeService.generateQRCode(paymentLinkAttribute.link);
+        paymentLinkAttribute.qr_code = codeQR;
         await this.paymentLinkRepository.create(paymentLinkAttribute);
         await this.linkService.updateOne(get_link._id, {
             usage: link_enum_1.LinkUsageEnum.USED,
@@ -153,6 +157,10 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
             sort: { createdAt: -1 },
             populate: [{ path: 'creator_id' }],
         });
+        return resp;
+    }
+    async getAllPaymentLink(query) {
+        const resp = await this.paymentLinkRepository.find(query, {}, {});
         return resp;
     }
     async singlePaymentLink(code) {
@@ -268,7 +276,8 @@ PaymentLinkService = __decorate([
         link_service_1.LinkService,
         config_1.ConfigService,
         excel_processor_service_1.ExcelService,
-        cloudinary_service_1.CloudinaryService])
+        cloudinary_service_1.CloudinaryService,
+        qrcode_service_1.QRCodeService])
 ], PaymentLinkService);
 exports.PaymentLinkService = PaymentLinkService;
 //# sourceMappingURL=payment-link.service.js.map

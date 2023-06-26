@@ -39,6 +39,12 @@ let WalletController = class WalletController extends controller_core_1.CoreCont
         const resp = await this.walletService.getWallet(currentUser._id);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
+    async webhook(res, body) {
+        console.log('body >> ', body);
+        await this.walletService.webhook(body);
+        const { event, data } = body;
+        return this.responseSuccess(res, '00', 'Success', {}, common_1.HttpStatus.CREATED);
+    }
 };
 __decorate([
     (0, common_1.Post)('/create'),
@@ -68,6 +74,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], WalletController.prototype, "getWallet", null);
+__decorate([
+    (0, common_1.Post)('/webhook'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], WalletController.prototype, "webhook", null);
 WalletController = __decorate([
     (0, common_1.Controller)('wallet'),
     __metadata("design:paramtypes", [wallet_service_1.WalletService])

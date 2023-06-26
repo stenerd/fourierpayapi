@@ -38,6 +38,7 @@ export declare class Transaction {
     type: TransactionType;
     reference: string;
     status?: TransactionStatus;
+    is_charges: boolean;
     payment_date: Date;
 }
 export declare const TransactionSchema: import("mongoose").Schema<Transaction, import("mongoose").Model<Transaction, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Transaction>;

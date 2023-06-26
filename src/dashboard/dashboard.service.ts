@@ -74,14 +74,14 @@ export class DashboardService {
       })
       .populate(['transaction_id', 'payment_link_id'])
       .sort({ _id: -1 })
-      .limit(4);
+      .limit(3);
     const recentPaymentLinks = await this.paymentLinkRepository
       .model()
       .find({
         ...(user_id ? { creator_id: user_id } : {}),
       })
       .sort({ _id: -1 })
-      .limit(4);
+      .limit(7);
 
     return {
       recentPayments,

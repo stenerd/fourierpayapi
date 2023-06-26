@@ -18,7 +18,6 @@ const transaction_service_1 = require("./transaction.service");
 const controller_core_1 = require("../common/core/controller.core");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const auth_guards_1 = require("../common/guards/auth.guards");
-const user_enum_1 = require("../user/user.enum");
 const view_transaction_dto_1 = require("./dto/view-transaction.dto");
 let TransactionController = class TransactionController extends controller_core_1.CoreController {
     constructor(transactionService) {
@@ -30,7 +29,7 @@ let TransactionController = class TransactionController extends controller_core_
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
     async getTransaction(res, currentUser, query) {
-        const resp = await this.transactionService.getTransaction(currentUser.role == user_enum_1.RoleEnum.SUPERADMIN ? null : currentUser._id, query);
+        const resp = await this.transactionService.getTransaction(currentUser._id, query);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
 };

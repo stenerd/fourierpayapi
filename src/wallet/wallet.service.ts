@@ -13,6 +13,7 @@ import { CreateWalletDto, walletWithdrawalDto } from './dto/create-wallet.dto';
 import { IWalletUpdate, IWalletUpdateReponse } from './wallet.interface';
 import { Wallet } from './wallet.model';
 import { WalletRepository } from './wallet.repository';
+import { UserRepository } from 'src/user/user.repository';
 
 @Injectable()
 export class WalletService extends CoreService<WalletRepository> {
@@ -21,6 +22,7 @@ export class WalletService extends CoreService<WalletRepository> {
     private readonly transactionService: TransactionService,
     private readonly paystackService: PaystackService,
     private readonly withdrawalService: WithdrawalService,
+    private readonly userRepository: UserRepository,
   ) {
     super(walletRepository);
   }
@@ -75,7 +77,25 @@ export class WalletService extends CoreService<WalletRepository> {
     return resp;
   }
 
+  computeCharges(amount: number): number {
+    if (amount <= 5000) return 50;
+    if (amount > 5000 && amount <= 50000) return 75;
+    if (amount > 50000) return 100;
+  }
+
   async walletWithdraw(data: walletWithdrawalDto, user_id: string) {
+    const get_wallet = await this.respository.findOne({ user_id });
+
+    if (!get_wallet) throw new BadRequestException('Wallet does not exist.');
+
+    const charges = this.computeCharges(data.amount);
+    const totalAmount = data.amount + charges;
+
+    if (get_wallet.amount < +totalAmount)
+      throw new BadRequestException(
+        'Insufficient wallet balance. Wait till you recieve more payments before processing a withdrawal.',
+      );
+
     const create_recipient = await this.paystackService.transferRecipient({
       type: 'nuban',
       name: data.name,
@@ -85,71 +105,25 @@ export class WalletService extends CoreService<WalletRepository> {
       user_id,
     });
 
-    console.log('create_recipient >> ', create_recipient);
-    // create_recipient >>  {
-    //   active: true,
-    //   createdAt: '2023-01-16T10:51:58.000Z',
-    //   currency: 'NGN',
-    //   description: null,
-    //   domain: 'test',
-    //   email: null,
-    //   id: 46322437,
-    //   integration: 175187,
-    //   metadata: { user_id: '63b66c6e958dfd81488e8254' },
-    //   name: 'CHINEDU CHUKWUEMEKA IFEDIORAH',
-    //   recipient_code: 'RCP_qxr41k38zmk46ws',
-    //   type: 'nuban',
-    //   updatedAt: '2023-01-16T13:40:27.000Z',
-    //   is_deleted: false,
-    //   isDeleted: false,
-    //   details: {
-    //     authorization_code: null,
-    //     account_number: '6235852943',
-    //     account_name: 'CHINEDU CHUKWUEMEKA IFEDIORAH',
-    //     bank_code: '070',
-    //     bank_name: 'Fidelity Bank'
-    //   }
-    // }
-
     console.log(create_recipient.recipient_code, data.amount);
 
     const create_transfer = await this.paystackService.transfer(
       create_recipient.recipient_code,
       data.amount * 100,
     );
-    console.log('create_transfer >> ', create_transfer);
-    // create_transfer >>  {
-    //   transfersessionid: [],
-    //   domain: 'test',
-    //   amount: 230000,
-    //   currency: 'NGN',
-    //   reference: 'rfkvwvupo9pic2loe21i',
-    //   source: 'balance',
-    //   source_details: null,
-    //   reason: 'Transfer',
-    //   status: 'success',
-    //   failures: null,
-    //   transfer_code: 'TRF_jklmd7vu501jk65j',
-    //   titan_code: null,
-    //   transferred_at: null,
-    //   id: 230038484,
-    //   integration: 175187,
-    //   request: 204029224,
-    //   recipient: 46322437,
-    //   createdAt: '2023-01-16T13:40:28.000Z',
-    //   updatedAt: '2023-01-16T13:40:28.000Z'
-    // }
+
+    // processing charges
 
     const wallet = await this.updateWallet({
       user_id,
-      amount: data.amount,
+      amount: +totalAmount,
       type: TransactionType.DEBIT,
     });
 
     const resp = await this.transactionService.generateReference();
 
     const transaction = await this.transactionService.create({
-      amount: data.amount,
+      amount: +data.amount,
       reciever_id: user_id,
       in_entity_id: wallet._id,
       in_entity: TransactionEntity.WALLET,
@@ -166,7 +140,8 @@ export class WalletService extends CoreService<WalletRepository> {
 
     const widthrawal = await this.withdrawalService.create({
       user_id,
-      amount: data.amount,
+      amount: +data.amount,
+      charges: +charges,
       account_number: data.account_number,
       bank_name: data.bank_name,
       name: data.name,
@@ -190,6 +165,108 @@ export class WalletService extends CoreService<WalletRepository> {
       out_entity: TransactionEntity.WITHDRAWAL,
     });
 
+    const resp2 = await this.transactionService.generateReference();
+
+    await this.transactionService.create({
+      amount: +charges,
+      reciever_id: user_id,
+      in_entity_id: wallet._id,
+      in_entity: TransactionEntity.WALLET,
+      type: TransactionType.DEBIT,
+      reference: resp2.reference,
+      status:
+        create_transfer.status == 'success'
+          ? TransactionStatus.PAID
+          : create_transfer.status,
+      ...(create_transfer.status == 'success'
+        ? { payment_date: new Date() }
+        : {}),
+      out_entity_id: widthrawal._id,
+      out_entity: TransactionEntity.WITHDRAWAL,
+      is_charges: true,
+    });
+
     return widthrawal;
+  }
+
+  async webhook(body: Record<string, any>) {
+    const { event, data } = body;
+
+    switch (event) {
+      case 'transfer.success':
+        await this.successfulTransferWebhook(data);
+        break;
+
+      default:
+        break;
+    }
+  }
+
+  async successfulTransferWebhook(data: Record<string, any>) {
+    const { reference, status } = data;
+
+    const withdrawal = await this.withdrawalService.findOne({
+      paystack_reference: reference,
+    });
+
+    if (withdrawal) {
+      await this.withdrawalService.updateOne(withdrawal._id, {
+        status: status == 'success' ? TransactionStatus.PAID : status,
+        payload: { ...withdrawal.payload, webhook: data },
+      });
+
+      const transaction = await this.transactionService.findOne({
+        _id: withdrawal.transaction_id,
+      });
+
+      if (transaction) {
+        await this.transactionService.updateOne(transaction._id, {
+          status: status == 'success' ? TransactionStatus.PAID : status,
+          payment_date: new Date(),
+        });
+      }
+
+      const transaction_charges = await this.transactionService.findOne({
+        out_entity_id: withdrawal._id,
+        out_entity: TransactionEntity.WITHDRAWAL,
+        is_charges: true,
+        reciever_id: transaction.reciever_id,
+      });
+
+      if (transaction_charges) {
+        await this.transactionService.updateOne(transaction_charges._id, {
+          status: status == 'success' ? TransactionStatus.PAID : status,
+          payment_date: new Date(),
+        });
+      }
+
+      if (withdrawal.charges) {
+        const get_reference = await this.transactionService.generateReference();
+
+        const superAdmin = await this.userRepository.findOne({
+          email: 'admin@fourierpay.com',
+        });
+
+        const adminWallet = await this.updateWallet({
+          user_id: superAdmin._id,
+          amount: withdrawal.charges,
+          type: TransactionType.CREDIT,
+        });
+        const trnx_payload = {
+          amount: withdrawal.charges,
+          reciever_id: superAdmin._id,
+          in_entity_id: withdrawal._id,
+          in_entity: TransactionEntity.WITHDRAWAL,
+          reference: get_reference.reference,
+          type: TransactionType.CREDIT,
+          status: TransactionStatus.PAID,
+          out_entity_id: adminWallet._id,
+          out_entity: TransactionEntity.WALLET,
+          is_charges: true,
+        };
+
+        await this.transactionService.create({ ...trnx_payload });
+      }
+    }
   }
 }

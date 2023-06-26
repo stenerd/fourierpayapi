@@ -79,7 +79,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         }
         const payment = await this.newPayment({
             payment_link_id: payment_link._id,
-            amount: dto.amount,
+            amount: payment_link.amount,
             charges: payment_link.charges,
             form: dto.form,
             unique_field: payment_link.unique_field,
@@ -94,7 +94,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         });
         const generate_paystack_payload = this.paystackFactory.initilizePaymentPayload(dto, get_reference.reference, payment_link, payment, transaction_enum_1.TransactionEntity.PAYMENT);
         const trnx_payload = {
-            amount: dto.amount,
+            amount: payment_link.amount,
             reciever_id: payment_link.creator_id,
             payment_link_id: payment_link._id,
             in_entity_id: payment._id,
@@ -104,7 +104,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         };
         const trnx = await this.transactionService.create(Object.assign({}, trnx_payload));
         await this.updateOne(payment._id, { transaction_id: trnx._id });
-        console.log('skjdbv >> ', this.configService.get('PAYSTACK_PUBLIC'));
         return Object.assign(Object.assign({}, generate_paystack_payload), { publicKey: this.configService.get('PAYSTACK_PUBLIC') });
     }
     async verifyPayment(dto) {
@@ -147,7 +146,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
             if (amount / 100 > transaction.amount) {
                 const get_reference = await this.transactionService.generateReference();
                 const superAdmin = await this.userService.findOne({
-                    email: 'admin@fourierpay.com',
+                    email: this.configService.get('ADMIN_EMAIL'),
                 });
                 const adminWallet = await this.walletService.updateWallet({
                     user_id: superAdmin._id,
@@ -165,6 +164,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                     status: transaction_enum_1.TransactionStatus.PAID,
                     out_entity_id: adminWallet._id,
                     out_entity: transaction_enum_1.TransactionEntity.WALLET,
+                    is_charges: true,
                 };
                 await this.transactionService.create(Object.assign({}, trnx_payload));
             }

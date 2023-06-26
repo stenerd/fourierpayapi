@@ -24,6 +24,10 @@ __decorate([
     __metadata("design:type", Number)
 ], Withdrawal.prototype, "amount", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 0.0 }),
+    __metadata("design:type", Number)
+], Withdrawal.prototype, "charges", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ required: true }),
     __metadata("design:type", String)
 ], Withdrawal.prototype, "account_number", void 0);

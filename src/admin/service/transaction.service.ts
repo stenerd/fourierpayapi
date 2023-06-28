@@ -16,4 +16,9 @@ export class AdminTransactionService {
     const resp = await this.transactionService.adminCharge(query);
     return resp;
   }
+
+  async chargesCount(query: ViewTransactionDto) {
+    const resp = await this.transactionService.adminChargeCount(query);
+    return resp;
+  }
 }

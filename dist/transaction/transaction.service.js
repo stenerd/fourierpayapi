@@ -14,6 +14,9 @@ const common_1 = require("@nestjs/common");
 const service_core_1 = require("../common/core/service.core");
 const code_generator_util_1 = require("../utils/code-generator.util");
 const transaction_repository_1 = require("./transaction.repository");
+const date_formatter_util_1 = require("../utils/date-formatter.util");
+const date_fns_1 = require("date-fns");
+const transaction_enum_1 = require("./transaction.enum");
 let TransactionService = class TransactionService extends service_core_1.CoreService {
     constructor(transactionRepository) {
         super(transactionRepository);
@@ -148,9 +151,7 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
     async adminTransaction(query) {
         let searchQuery = {};
         if (query.q) {
-            searchQuery = {
-                reference: { $regex: query.q, $options: 'i' },
-            };
+            searchQuery = Object.assign(Object.assign({}, searchQuery), { reference: { $regex: query.q, $options: 'i' } });
         }
         if (query.status) {
             searchQuery.status = query.status;
@@ -205,20 +206,11 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
         };
     }
     async adminCharge(query) {
-        let searchQuery = {};
+        let searchQuery = {
+            type: transaction_enum_1.TransactionType.CREDIT,
+        };
         if (query.q) {
-            searchQuery = {
-                reference: { $regex: query.q, $options: 'i' },
-            };
-        }
-        if (query.status) {
-            searchQuery.status = query.status;
-        }
-        if (query.entity) {
-            searchQuery.in_entity = query.entity;
-        }
-        if (query.type) {
-            searchQuery.type = query.type;
+            searchQuery = Object.assign(Object.assign({}, searchQuery), { reference: { $regex: query.q, $options: 'i' } });
         }
         searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: true }, searchQuery), (query.startDate &&
             !query.endDate && {
@@ -261,6 +253,123 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
                 page: +page || 1,
                 lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
             },
+        };
+    }
+    async adminChargeCount(query) {
+        let searchQuery = {
+            type: transaction_enum_1.TransactionType.CREDIT,
+        };
+        if (query.q) {
+            searchQuery = Object.assign(Object.assign({}, searchQuery), { reference: { $regex: query.q, $options: 'i' } });
+        }
+        const recentQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: true }, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const transaction = await this.transactionRepository.model().find(Object.assign({}, recentQuery));
+        let percentage = 0;
+        let paystackPercentage = 0;
+        let paystackTotal = 0;
+        let adminChargePercentage = 0;
+        const recentTotal = transaction.reduce((accumulator, currentValue) => {
+            if (currentValue.in_entity === transaction_enum_1.TransactionEntity.WITHDRAWAL) {
+                if (+currentValue.amount === 100) {
+                    paystackTotal += 50;
+                }
+                if (+currentValue.amount === 75) {
+                    paystackTotal += 25;
+                }
+                if (+currentValue.amount === 50) {
+                    paystackTotal += 10;
+                }
+            }
+            else {
+                if (+currentValue.amount > 3000) {
+                    const amount = +currentValue.amount * 50 + +currentValue.amount;
+                    const paystackCharge = 0.015 * amount;
+                    paystackTotal += paystackCharge;
+                }
+                else {
+                    paystackTotal += 2000;
+                }
+            }
+            if (currentValue.status === transaction_enum_1.TransactionStatus.PAID) {
+                return accumulator + +currentValue.amount;
+            }
+            else {
+                return accumulator;
+            }
+        }, 0);
+        const checkLast = query.startDate && query.endDate;
+        if (!!checkLast) {
+            const getDifferenceInDays = (0, date_formatter_util_1.CheckDateDifference)(query.startDate, query.endDate);
+            const lastQueries = Object.assign(Object.assign({ is_charges: true }, searchQuery), (query.startDate &&
+                query.endDate && {
+                createdAt: {
+                    $gte: new Date((0, date_fns_1.format)((0, date_fns_1.subDays)((0, date_fns_1.parseISO)(query.startDate), getDifferenceInDays), 'yyyy-MM-dd')).toISOString(),
+                    $lte: new Date(query.startDate).toISOString(),
+                },
+            }));
+            const lastTransaction = await this.transactionRepository.model().find(Object.assign({}, lastQueries));
+            let lastPaystackTotal = 0;
+            const lastTotal = lastTransaction.reduce((accumulator, currentValue) => {
+                if (currentValue.in_entity === transaction_enum_1.TransactionEntity.WITHDRAWAL) {
+                    if (+currentValue.amount === 100) {
+                        lastPaystackTotal += 50;
+                    }
+                    if (+currentValue.amount === 75) {
+                        lastPaystackTotal += 25;
+                    }
+                    if (+currentValue.amount === 50) {
+                        lastPaystackTotal += 10;
+                    }
+                }
+                else {
+                    if (+currentValue.amount < 3000) {
+                        const amount = +currentValue.amount * 50 + +currentValue.amount;
+                        const paystackCharge = 0.015 * amount;
+                        lastPaystackTotal += paystackCharge;
+                    }
+                    else {
+                        lastPaystackTotal += 2000;
+                    }
+                }
+                if (currentValue.status === transaction_enum_1.TransactionStatus.PAID) {
+                    return accumulator + +currentValue.amount;
+                }
+                else {
+                    return accumulator;
+                }
+            }, 0);
+            percentage = ((recentTotal - lastTotal) / (lastTotal || 1)) * 100;
+            paystackPercentage =
+                ((paystackTotal - lastPaystackTotal) / (lastPaystackTotal || 1)) * 100;
+            const recentAdminCharge = recentTotal - paystackTotal;
+            const lastAdminCharge = lastTotal - lastPaystackTotal;
+            adminChargePercentage =
+                ((recentAdminCharge - lastAdminCharge) / (lastAdminCharge || 1)) * 100;
+        }
+        return {
+            percentage,
+            showPercent: !!checkLast,
+            total: recentTotal,
+            paystackTotal,
+            paystackPercentage,
+            adminCharge: recentTotal - paystackTotal,
+            adminChargePercentage,
         };
     }
 };

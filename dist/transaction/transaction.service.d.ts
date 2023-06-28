@@ -47,4 +47,13 @@ export declare class TransactionService extends CoreService<TransactionRepositor
             lastPage: number;
         };
     }>;
+    adminChargeCount(query: ViewTransactionDto): Promise<{
+        percentage: number;
+        showPercent: boolean;
+        total: number;
+        paystackTotal: number;
+        paystackPercentage: number;
+        adminCharge: number;
+        adminChargePercentage: number;
+    }>;
 }

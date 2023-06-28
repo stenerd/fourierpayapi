@@ -18,6 +18,7 @@ import {
   PaymentLinkStateEnum,
   PaymentLinkStatusEnum,
 } from '../payment-link.enum';
+import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 
 export class FormDto {
   @ApiProperty({
@@ -134,4 +135,16 @@ export class ChangePaymentLinkStateDto {
   @IsEnum(PaymentLinkStateEnum)
   @IsNotEmpty()
   state: PaymentLinkStateEnum;
+}
+
+export class ViewPaymentLinkDto extends CoreSearchFilterDatePaginationDto {
+  @ApiProperty()
+  @IsEnum(PaymentLinkStateEnum)
+  @IsOptional()
+  state: PaymentLinkStateEnum;
+
+  @ApiProperty()
+  @IsEnum(PaymentLinkStatusEnum)
+  @IsOptional()
+  status: PaymentLinkStatusEnum;
 }

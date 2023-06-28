@@ -7,7 +7,7 @@ import { CoreService } from 'src/common/core/service.core';
 import { WalletService } from 'src/wallet/wallet.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RoleEnum } from './user.enum';
+import { RoleEnum, UserStatusEnum } from './user.enum';
 import { UserFactory } from './user.factory';
 import { User } from './user.model';
 import { UserRepository } from './user.repository';
@@ -18,6 +18,8 @@ import { ResetPasswordDto } from 'src/auth/dto/create-auth.dto';
 import { SubscriptionService } from 'src/subscription/services/subscription.service';
 import { SubscriptionSettingService } from 'src/subscription/services/subscription-setting.service';
 import { SubscriptionTagEnum } from 'src/subscription/subscription.enum';
+import { AllUserDto } from 'src/admin/dtos/user.dto';
+import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 
 @Injectable()
 export class UserService extends CoreService<UserRepository> {
@@ -125,5 +127,232 @@ export class UserService extends CoreService<UserRepository> {
     get_user.token = GenerateRandomString(30);
 
     return await this.userRepository.save(get_user);
+  }
+
+  async allUsers(query: AllUserDto) {
+    let searchQuery: Record<string, any> = {};
+    if (query.q) {
+      searchQuery = {
+        email: { $regex: query.q, $options: 'i' },
+      };
+    }
+    if (query.isActive) {
+      searchQuery.isActive = query.isActive === UserStatusEnum.ACTIVE;
+    }
+
+    searchQuery = {
+      ...searchQuery,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+    };
+
+    const total = await this.userRepository
+      .model()
+      .find({
+        ...searchQuery,
+      })
+      .count();
+
+    const { page, perPage } = query;
+    const users = await this.userRepository
+      .model()
+      .find({
+        ...searchQuery,
+      })
+      .populate(['role'])
+      .sort({ _id: -1 })
+      .skip(((+page || 1) - 1) * (+perPage || 10))
+      .limit(+perPage || 10);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page: +page || 1,
+        lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+      },
+    };
+  }
+
+  async allCountUsers() {
+    const totalActive = await this.userRepository
+      .model()
+      .find({
+        isActive: true,
+      })
+      .count();
+
+    const totalInActive = await this.userRepository
+      .model()
+      .find({
+        isActive: false,
+      })
+      .count();
+
+    return {
+      data: {
+        active: totalActive,
+        inactive: totalInActive,
+      },
+    };
+  }
+
+  async countUsers(query: CoreSearchFilterDatePaginationDto) {
+    let searchQuery: Record<string, any> = {};
+    if (query.q) {
+      searchQuery = {
+        email: { $regex: query.q, $options: 'i' },
+      };
+    }
+
+    const searchActiveQuery = {
+      ...searchQuery,
+      isActive: true,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+    };
+
+    const searchInActiveQuery = {
+      ...searchQuery,
+      isActive: false,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+    };
+
+    const searchAllQuery = {
+      ...searchQuery,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+    };
+
+    const totalActive = await this.userRepository
+      .model()
+      .find({
+        ...searchActiveQuery,
+      })
+      .count();
+
+    const totalInActive = await this.userRepository
+      .model()
+      .find({
+        ...searchInActiveQuery,
+      })
+      .count();
+
+    const totalAll = await this.userRepository
+      .model()
+      .find({
+        ...searchAllQuery,
+      })
+      .count();
+
+    return {
+      data: {
+        all: totalAll,
+        active: totalActive,
+        inactive: totalInActive,
+      },
+    };
+  }
+
+  async dashboardCount(query: CoreSearchFilterDatePaginationDto) {
+    const searchAllQuery = {
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate).toISOString(),
+            $gte: new Date(query.startDate).toISOString(),
+          },
+        }),
+    };
+
+    const totalAll = await this.userRepository
+      .model()
+      .find({
+        ...searchAllQuery,
+      })
+      .count();
+
+    return totalAll;
   }
 }

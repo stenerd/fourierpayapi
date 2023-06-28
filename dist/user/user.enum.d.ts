@@ -3,3 +3,7 @@ export declare enum RoleEnum {
     PAYER = "Payer",
     SUPERADMIN = "SuperAdmin"
 }
+export declare enum UserStatusEnum {
+    ACTIVE = "active",
+    INACTIVE = "inactive"
+}

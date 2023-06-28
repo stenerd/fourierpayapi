@@ -97,6 +97,172 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
             },
         };
     }
+    async dashboardTransaction(query) {
+        const searchAllQuery = Object.assign(Object.assign(Object.assign({ is_charges: false }, (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const totalAll = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchAllQuery))
+            .count();
+        return { totalAll };
+    }
+    async dashboardCharge(query) {
+        const searchAllQuery = Object.assign(Object.assign(Object.assign({ is_charges: true }, (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const totalAll = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchAllQuery))
+            .count();
+        return { totalAll };
+    }
+    async adminTransaction(query) {
+        let searchQuery = {};
+        if (query.q) {
+            searchQuery = {
+                reference: { $regex: query.q, $options: 'i' },
+            };
+        }
+        if (query.status) {
+            searchQuery.status = query.status;
+        }
+        if (query.entity) {
+            searchQuery.in_entity = query.entity;
+        }
+        if (query.type) {
+            searchQuery.type = query.type;
+        }
+        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: false }, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const total = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .count();
+        const { page, perPage } = query;
+        const transaction = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .populate([
+            'reciever_id',
+            'in_entity_id',
+            'out_entity_id',
+            'payment_link_id',
+        ])
+            .sort({ _id: -1 })
+            .skip(((+page || 1) - 1) * (+perPage || 10))
+            .limit(+perPage || 10);
+        return {
+            data: transaction,
+            meta: {
+                total,
+                page: +page || 1,
+                lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+            },
+        };
+    }
+    async adminCharge(query) {
+        let searchQuery = {};
+        if (query.q) {
+            searchQuery = {
+                reference: { $regex: query.q, $options: 'i' },
+            };
+        }
+        if (query.status) {
+            searchQuery.status = query.status;
+        }
+        if (query.entity) {
+            searchQuery.in_entity = query.entity;
+        }
+        if (query.type) {
+            searchQuery.type = query.type;
+        }
+        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: true }, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const total = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .count();
+        const { page, perPage } = query;
+        const transaction = await this.transactionRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .populate([
+            'reciever_id',
+            'in_entity_id',
+            'out_entity_id',
+            'payment_link_id',
+        ])
+            .sort({ _id: -1 })
+            .skip(((+page || 1) - 1) * (+perPage || 10))
+            .limit(+perPage || 10);
+        return {
+            data: transaction,
+            meta: {
+                total,
+                page: +page || 1,
+                lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+            },
+        };
+    }
 };
 TransactionService = __decorate([
     (0, common_1.Injectable)(),

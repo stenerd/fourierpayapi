@@ -81,6 +81,84 @@ let WithdrawalService = class WithdrawalService extends service_core_1.CoreServi
             },
         };
     }
+    async dashboardWithdrawal(query) {
+        const searchAllQuery = Object.assign(Object.assign(Object.assign({ is_charges: true }, (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const totalAll = await this.withdrawalRepository
+            .model()
+            .find(Object.assign({}, searchAllQuery))
+            .count();
+        return { totalAll };
+    }
+    async adminWithdrawal(query) {
+        let searchQuery = {};
+        if (query.q) {
+            searchQuery = {
+                $or: [
+                    { bank_name: { $regex: query.q, $options: 'i' } },
+                    { account_number: { $regex: query.q, $options: 'i' } },
+                    { name: { $regex: query.q, $options: 'i' } },
+                    { paystack_reference: { $regex: query.q, $options: 'i' } },
+                ],
+            };
+        }
+        if (query.status) {
+            searchQuery.status = query.status;
+        }
+        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({}, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        console.log('searchQuery >> ', Object.assign({}, searchQuery));
+        const total = await this.withdrawalRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .count();
+        const { page, perPage } = query;
+        const resp = await this.withdrawalRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .populate(['transaction_id'])
+            .sort({ _id: -1 })
+            .skip(((+page || 1) - 1) * (+perPage || 10))
+            .limit(+perPage || 10);
+        return {
+            data: resp,
+            meta: {
+                total,
+                page: +page || 1,
+                lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+            },
+        };
+    }
 };
 WithdrawalService = __decorate([
     (0, common_1.Injectable)(),

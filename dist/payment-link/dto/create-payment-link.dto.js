@@ -9,11 +9,12 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChangePaymentLinkStateDto = exports.ChangePaymentLinkStatusDto = exports.CreatePaymentLinkDto = exports.FormDto = void 0;
+exports.ViewPaymentLinkDto = exports.ChangePaymentLinkStateDto = exports.ChangePaymentLinkStatusDto = exports.CreatePaymentLinkDto = exports.FormDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
 const payment_link_enum_1 = require("../payment-link.enum");
+const dto_core_1 = require("../../common/core/dto.core");
 class FormDto {
 }
 __decorate([
@@ -151,4 +152,19 @@ __decorate([
     __metadata("design:type", String)
 ], ChangePaymentLinkStateDto.prototype, "state", void 0);
 exports.ChangePaymentLinkStateDto = ChangePaymentLinkStateDto;
+class ViewPaymentLinkDto extends dto_core_1.CoreSearchFilterDatePaginationDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsEnum)(payment_link_enum_1.PaymentLinkStateEnum),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ViewPaymentLinkDto.prototype, "state", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsEnum)(payment_link_enum_1.PaymentLinkStatusEnum),
+    (0, class_validator_1.IsOptional)(),
+    __metadata("design:type", String)
+], ViewPaymentLinkDto.prototype, "status", void 0);
+exports.ViewPaymentLinkDto = ViewPaymentLinkDto;
 //# sourceMappingURL=create-payment-link.dto.js.map

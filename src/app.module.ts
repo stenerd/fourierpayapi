@@ -24,6 +24,7 @@ import { AppController } from './app.controller';
 import { QRCodeModule } from './qrcode/qrcode.module';
 import { JobModule } from './job/job.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AdminModule } from './admin/admin.module';
 const config = configuration();
 
 @Module({
@@ -90,6 +91,7 @@ const config = configuration();
     CloudinaryModule,
     QRCodeModule,
     JobModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

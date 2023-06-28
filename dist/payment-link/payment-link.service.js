@@ -267,6 +267,81 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
             },
         };
     }
+    async dashboardPaymentLink(query) {
+        const searchAllQuery = Object.assign(Object.assign(Object.assign({}, (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const totalAll = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchAllQuery))
+            .count();
+        return { totalAll };
+    }
+    async adminPaymentLink(query) {
+        let searchQuery = {};
+        if (query.q) {
+            searchQuery = {
+                name: { $regex: query.q, $options: 'i' },
+            };
+        }
+        if (query.status) {
+            searchQuery.status = query.status;
+        }
+        if (query.state) {
+            searchQuery.state = query.state;
+        }
+        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: false }, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate).toISOString(),
+                $gte: new Date(query.startDate).toISOString(),
+            },
+        }));
+        const total = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .count();
+        const { page, perPage } = query;
+        const paymentLinks = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchQuery))
+            .populate(['creator_id', 'link_id'])
+            .sort({ _id: -1 })
+            .skip(((+page || 1) - 1) * (+perPage || 10))
+            .limit(+perPage || 10);
+        return {
+            data: paymentLinks,
+            meta: {
+                total,
+                page: +page || 1,
+                lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+            },
+        };
+    }
 };
 PaymentLinkService = __decorate([
     (0, common_1.Injectable)(),

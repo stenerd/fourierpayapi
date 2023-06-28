@@ -1,4 +1,5 @@
 import { FieldTypeEnum, PaymentLinkStateEnum, PaymentLinkStatusEnum } from '../payment-link.enum';
+import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 export declare class FormDto {
     field_name: string;
     field_type: FieldTypeEnum;
@@ -22,4 +23,8 @@ export declare class ChangePaymentLinkStatusDto {
 }
 export declare class ChangePaymentLinkStateDto {
     state: PaymentLinkStateEnum;
+}
+export declare class ViewPaymentLinkDto extends CoreSearchFilterDatePaginationDto {
+    state: PaymentLinkStateEnum;
+    status: PaymentLinkStatusEnum;
 }

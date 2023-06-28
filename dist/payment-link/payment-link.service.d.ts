@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CoreService } from 'src/common/core/service.core';
 import { ExcelService } from 'src/file-processor/excel-processor.service';
 import { LinkService } from 'src/link/link.service';
-import { ChangePaymentLinkStatusDto, CreatePaymentLinkDto } from './dto/create-payment-link.dto';
+import { ChangePaymentLinkStatusDto, CreatePaymentLinkDto, ViewPaymentLinkDto } from './dto/create-payment-link.dto';
 import { PaymentLinkFactory } from './payment-link.factory';
 import { PaymentLinkRepository } from './repositories/payment-link.repository';
 import { PayerSheetRepository } from './repositories/payer_sheet.repository';
@@ -11,6 +11,7 @@ import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PaymentLink } from './models/payment-link.model';
 import { QRCodeService } from 'src/qrcode/qrcode.service';
+import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 export declare class PaymentLinkService extends CoreService<PaymentLinkRepository> {
     private readonly paymentLinkRepository;
     private readonly payerSheetRepository;
@@ -51,6 +52,19 @@ export declare class PaymentLinkService extends CoreService<PaymentLinkRepositor
             recievedAmount: number;
             numberOfRecipient: number;
         };
+        meta: {
+            total: number;
+            page: number;
+            lastPage: number;
+        };
+    }>;
+    dashboardPaymentLink(query: CoreSearchFilterDatePaginationDto): Promise<{
+        totalAll: number;
+    }>;
+    adminPaymentLink(query: ViewPaymentLinkDto): Promise<{
+        data: Omit<PaymentLink & import("mongoose").Document<any, any, any> & {
+            _id: import("mongoose").Types.ObjectId;
+        }, never>[];
         meta: {
             total: number;
             page: number;

@@ -20,6 +20,9 @@ import { SubscriptionSettingService } from 'src/subscription/services/subscripti
 import { SubscriptionTagEnum } from 'src/subscription/subscription.enum';
 import { AllUserDto } from 'src/admin/dtos/user.dto';
 import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
+import { TransactionStatus } from 'src/transaction/transaction.enum';
+import { CheckDateDifference } from 'src/utils/date-formatter.util';
+import { addDays, format, parseISO, subDays } from 'date-fns';
 
 @Injectable()
 export class UserService extends CoreService<UserRepository> {
@@ -145,20 +148,20 @@ export class UserService extends CoreService<UserRepository> {
       ...(query.startDate &&
         !query.endDate && {
           createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
+            $gte: new Date(query.startDate),
           },
         }),
       ...(!query.startDate &&
         query.endDate && {
           createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
+            $lte: new Date(query.endDate),
           },
         }),
       ...(query.startDate &&
         query.endDate && {
           createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
+            $lte: new Date(query.endDate),
+            $gte: new Date(query.startDate),
           },
         }),
     };
@@ -171,15 +174,108 @@ export class UserService extends CoreService<UserRepository> {
       .count();
 
     const { page, perPage } = query;
-    const users = await this.userRepository
-      .model()
-      .find({
-        ...searchQuery,
-      })
-      .populate(['role'])
-      .sort({ _id: -1 })
-      .skip(((+page || 1) - 1) * (+perPage || 10))
-      .limit(+perPage || 10);
+
+    const users = await this.userRepository.model().aggregate([
+      {
+        $match: {
+          ...searchQuery,
+        },
+      },
+      {
+        $lookup: {
+          from: 'wallets',
+          localField: '_id',
+          foreignField: 'user_id',
+          as: 'wallets',
+        },
+      },
+      {
+        $lookup: {
+          from: 'paymentlinks',
+          localField: '_id',
+          foreignField: 'creator_id',
+          as: 'paymentlinks',
+        },
+      },
+      {
+        $lookup: {
+          from: 'transactions',
+          let: { user_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$reciever_id', '$$user_id'],
+                },
+              },
+            },
+            {
+              $match: {
+                status: TransactionStatus.PAID,
+              },
+            },
+          ],
+          as: 'transactions',
+        },
+      },
+      {
+        $lookup: {
+          from: 'withdrawals',
+          let: { user_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$user_id', '$$user_id'],
+                },
+              },
+            },
+            {
+              $match: {
+                status: TransactionStatus.PAID,
+              },
+            },
+          ],
+          as: 'withdrawals',
+        },
+      },
+      {
+        $addFields: {
+          transactionCount: { $size: '$transactions' },
+          paymentLinksCount: { $size: '$paymentlinks' },
+          totalTransaction: { $sum: '$transactions.amount' },
+          walletBalance: { $sum: '$wallets.amount' },
+          totalWithdrawal: { $sum: '$withdrawals.amount' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          firstname: 1,
+          lastname: 1,
+          email: 1,
+          role: 1,
+          isActive: 1,
+          paymentLinksCount: 1,
+          transactionCount: 1,
+          walletBalance: 1,
+          totalTransaction: 1,
+          totalWithdrawal: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1, // Replace "fieldName" with the actual field name for ordering
+        },
+      },
+      {
+        $skip: ((+page || 1) - 1) * (+perPage || 10),
+      },
+      {
+        $limit: +perPage || 10,
+      },
+    ]);
 
     return {
       data: users,
@@ -314,11 +410,81 @@ export class UserService extends CoreService<UserRepository> {
       })
       .count();
 
+    let activePercentage = 0;
+    let allPercentage = 0;
+    let inActivePercentage = 0;
+
+    const checkLast = query.startDate && query.endDate;
+
+    if (!!checkLast) {
+      const getDifferenceInDays = CheckDateDifference(
+        query.startDate,
+        query.endDate,
+      );
+
+      const lastSearchQueries = {
+        ...searchQuery,
+        ...(query.startDate &&
+          query.endDate && {
+            createdAt: {
+              $gte: new Date(
+                format(
+                  subDays(parseISO(query.startDate), getDifferenceInDays),
+                  'yyyy-MM-dd',
+                ),
+              ).toISOString(),
+              $lte: new Date(query.startDate).toISOString(),
+            },
+          }),
+      };
+
+      const lastSearchActiveQuery = {
+        ...lastSearchQueries,
+        isActive: true,
+      };
+
+      const lastSearchInActiveQuery = {
+        ...lastSearchQueries,
+        isActive: false,
+      };
+
+      const lastTotalActive = await this.userRepository
+        .model()
+        .find({
+          ...lastSearchActiveQuery,
+        })
+        .count();
+
+      const lastTotalInActive = await this.userRepository
+        .model()
+        .find({
+          ...lastSearchInActiveQuery,
+        })
+        .count();
+
+      const lastTotalAll = await this.userRepository
+        .model()
+        .find({
+          ...lastSearchQueries,
+        })
+        .count();
+
+      allPercentage = ((totalAll - lastTotalAll) / (lastTotalAll || 1)) * 100;
+      inActivePercentage =
+        ((totalInActive - lastTotalInActive) / (lastTotalInActive || 1)) * 100;
+      activePercentage =
+        ((totalActive - lastTotalActive) / (lastTotalActive || 1)) * 100;
+    }
+
     return {
       data: {
         all: totalAll,
         active: totalActive,
         inactive: totalInActive,
+        allPercentage,
+        inActivePercentage,
+        activePercentage,
+        showPercent: !!checkLast,
       },
     };
   }

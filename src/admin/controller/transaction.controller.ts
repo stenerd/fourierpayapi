@@ -38,4 +38,13 @@ export class AdminTransactionController extends CoreController {
     const resp = await this.adminTransactionService.chargesCount(query);
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
   }
+
+  @Get('count')
+  async transactionsCount(
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: ViewTransactionDto,
+  ) {
+    const resp = await this.adminTransactionService.transactionsCount(query);
+    return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
+  }
 }

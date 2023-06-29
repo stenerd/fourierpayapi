@@ -8,4 +8,5 @@ export declare class AdminTransactionController extends CoreController {
     transactions(res: Response, query: ViewTransactionDto): Promise<void>;
     charges(res: Response, query: ViewTransactionDto): Promise<void>;
     chargesCount(res: Response, query: ViewTransactionDto): Promise<void>;
+    transactionsCount(res: Response, query: ViewTransactionDto): Promise<void>;
 }

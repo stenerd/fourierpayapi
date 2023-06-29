@@ -28,6 +28,10 @@ let AdminTransactionService = class AdminTransactionService {
         const resp = await this.transactionService.adminChargeCount(query);
         return resp;
     }
+    async transactionsCount(query) {
+        const resp = await this.transactionService.adminTransactionsCount(query);
+        return resp;
+    }
 };
 AdminTransactionService = __decorate([
     (0, common_1.Injectable)(),

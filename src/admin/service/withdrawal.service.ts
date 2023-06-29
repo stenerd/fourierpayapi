@@ -10,4 +10,9 @@ export class AdminWithdrawalService {
     const resp = await this.withdrawalService.adminWithdrawal(query);
     return resp;
   }
+
+  async withdrawalsCount(query: ViewWithdrawalDto) {
+    const resp = await this.withdrawalService.adminWithdrawalCount(query);
+    return resp;
+  }
 }

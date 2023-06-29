@@ -32,4 +32,13 @@ export declare class AdminTransactionService {
         adminCharge: number;
         adminChargePercentage: number;
     }>;
+    transactionsCount(query: ViewTransactionDto): Promise<{
+        percentage: number;
+        showPercent: boolean;
+        total: any;
+        paymentTotal: any;
+        paymentPercentage: number;
+        withdrawalTotal: any;
+        withdrawalPercentage: number;
+    }>;
 }

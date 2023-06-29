@@ -34,6 +34,10 @@ let AdminTransactionController = class AdminTransactionController extends contro
         const resp = await this.adminTransactionService.chargesCount(query);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
+    async transactionsCount(res, query) {
+        const resp = await this.adminTransactionService.transactionsCount(query);
+        return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
+    }
 };
 __decorate([
     (0, common_1.Get)(''),
@@ -59,6 +63,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, view_transaction_dto_1.ViewTransactionDto]),
     __metadata("design:returntype", Promise)
 ], AdminTransactionController.prototype, "chargesCount", null);
+__decorate([
+    (0, common_1.Get)('count'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, view_transaction_dto_1.ViewTransactionDto]),
+    __metadata("design:returntype", Promise)
+], AdminTransactionController.prototype, "transactionsCount", null);
 AdminTransactionController = __decorate([
     (0, common_1.Controller)('admin/transactions'),
     __metadata("design:paramtypes", [transaction_service_1.AdminTransactionService])

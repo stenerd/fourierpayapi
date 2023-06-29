@@ -20,6 +20,10 @@ let AdminWithdrawalService = class AdminWithdrawalService {
         const resp = await this.withdrawalService.adminWithdrawal(query);
         return resp;
     }
+    async withdrawalsCount(query) {
+        const resp = await this.withdrawalService.adminWithdrawalCount(query);
+        return resp;
+    }
 };
 AdminWithdrawalService = __decorate([
     (0, common_1.Injectable)(),

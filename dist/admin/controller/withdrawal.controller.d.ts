@@ -6,4 +6,5 @@ export declare class AdminWithdrawalController extends CoreController {
     private readonly adminWithdrawalService;
     constructor(adminWithdrawalService: AdminWithdrawalService);
     withdrawals(res: Response, query: ViewTransactionDto): Promise<void>;
+    withdrawalsCount(res: Response, query: ViewTransactionDto): Promise<void>;
 }

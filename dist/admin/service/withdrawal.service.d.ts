@@ -13,4 +13,11 @@ export declare class AdminWithdrawalService {
             lastPage: number;
         };
     }>;
+    withdrawalsCount(query: ViewWithdrawalDto): Promise<{
+        percentage: number;
+        pendingPercentage: number;
+        showPercent: boolean;
+        totalRecentPendingAmount: number;
+        totalRecentAmount: number;
+    }>;
 }

@@ -19,4 +19,13 @@ export class AdminWithdrawalController extends CoreController {
     const resp = await this.adminWithdrawalService.withdrawals(query);
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
   }
+
+  @Get('count')
+  async withdrawalsCount(
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: ViewTransactionDto,
+  ) {
+    const resp = await this.adminWithdrawalService.withdrawalsCount(query);
+    return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
+  }
 }

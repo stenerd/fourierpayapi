@@ -484,4 +484,169 @@ export class TransactionService extends CoreService<TransactionRepository> {
       adminChargePercentage,
     };
   }
+
+  async adminTransactionsCount(query: ViewTransactionDto) {
+    let searchQuery: Record<string, any> = {
+      status: TransactionStatus.PAID,
+    };
+    if (query.q) {
+      searchQuery = {
+        ...searchQuery,
+        reference: { $regex: query.q, $options: 'i' },
+      };
+    }
+
+    const recentQuery = {
+      is_charges: { $ne: true },
+      ...searchQuery,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate),
+            $gte: new Date(query.startDate),
+          },
+        }),
+    };
+
+    const transaction = await this.transactionRepository.model().aggregate([
+      {
+        $match: {
+          ...recentQuery,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          recentTotal: {
+            $sum: '$amount',
+          },
+          paymentTotal: {
+            $sum: {
+              $cond: [
+                { $eq: ['$in_entity', TransactionEntity.PAYMENT] },
+                '$amount',
+                0,
+              ],
+            },
+          },
+          withdrawalTotal: {
+            $sum: {
+              $cond: [
+                { $eq: ['$out_entity', TransactionEntity.WITHDRAWAL] },
+                '$amount',
+                0,
+              ],
+            },
+          },
+        },
+      },
+    ]);
+
+    let percentage = 0;
+    let paymentPercentage = 0;
+    const recentTotal = transaction[0] ? transaction[0].recentTotal : 0;
+    const paymentTotal = transaction[0] ? transaction[0].paymentTotal : 0;
+    const withdrawalTotal = transaction[0] ? transaction[0].withdrawalTotal : 0;
+    let withdrawalPercentage = 0;
+
+    const checkLast = query.startDate && query.endDate;
+
+    if (!!checkLast) {
+      const getDifferenceInDays = CheckDateDifference(
+        query.startDate,
+        query.endDate,
+      );
+
+      const lastQueries = {
+        is_charges: { $ne: true },
+        ...searchQuery,
+        ...(query.startDate &&
+          query.endDate && {
+            createdAt: {
+              $gte: new Date(
+                format(
+                  subDays(parseISO(query.startDate), getDifferenceInDays),
+                  'yyyy-MM-dd',
+                ),
+              ),
+              $lte: new Date(query.startDate),
+            },
+          }),
+      };
+
+      const lastTransaction = await this.transactionRepository
+        .model()
+        .aggregate([
+          {
+            $match: {
+              ...lastQueries,
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              recentTotal: {
+                $sum: '$amount',
+              },
+              paymentTotal: {
+                $sum: {
+                  $cond: [
+                    { $eq: ['$in_entity', TransactionEntity.PAYMENT] },
+                    '$amount',
+                    0,
+                  ],
+                },
+              },
+              withdrawalTotal: {
+                $sum: {
+                  $cond: [
+                    { $eq: ['$out_entity', TransactionEntity.WITHDRAWAL] },
+                    '$amount',
+                    0,
+                  ],
+                },
+              },
+            },
+          },
+        ]);
+
+      const lastTotal = lastTransaction[0] ? lastTransaction[0].recentTotal : 0;
+      const lastPaymentTotal = lastTransaction[0]
+        ? lastTransaction[0].paymentTotal
+        : 0;
+      const lastWithdrawalTotal = lastTransaction[0]
+        ? lastTransaction[0].withdrawalTotal
+        : 0;
+
+      percentage = ((recentTotal - lastTotal) / (lastTotal || 1)) * 100;
+      paymentPercentage =
+        ((paymentTotal - lastPaymentTotal) / (lastPaymentTotal || 1)) * 100;
+
+      withdrawalPercentage =
+        ((withdrawalTotal - lastWithdrawalTotal) / (lastWithdrawalTotal || 1)) *
+        100;
+    }
+
+    return {
+      percentage,
+      showPercent: !!checkLast,
+      total: recentTotal,
+      paymentTotal,
+      paymentPercentage,
+      withdrawalTotal,
+      withdrawalPercentage,
+    };
+  }
 }

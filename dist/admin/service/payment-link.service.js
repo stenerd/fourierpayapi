@@ -20,6 +20,10 @@ let AdminPaymentLinkService = class AdminPaymentLinkService {
         const resp = await this.paymentLinkService.adminPaymentLink(query);
         return resp;
     }
+    async paymentLinksCount(query) {
+        const resp = await this.paymentLinkService.adminPaymentLinksCount(query);
+        return resp;
+    }
 };
 AdminPaymentLinkService = __decorate([
     (0, common_1.Injectable)(),

@@ -157,7 +157,7 @@ let WalletService = class WalletService extends service_core_1.CoreService {
             if (withdrawal.charges) {
                 const get_reference = await this.transactionService.generateReference();
                 const superAdmin = await this.userRepository.findOne({
-                    email: 'admin@fourierpay.com',
+                    email: 'fourierpay@gmail.com',
                 });
                 const adminWallet = await this.updateWallet({
                     user_id: superAdmin._id,

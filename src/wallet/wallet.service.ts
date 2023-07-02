@@ -244,7 +244,7 @@ export class WalletService extends CoreService<WalletRepository> {
         const get_reference = await this.transactionService.generateReference();
 
         const superAdmin = await this.userRepository.findOne({
-          email: 'admin@fourierpay.com',
+          email: 'fourierpay@gmail.com',
         });
 
         const adminWallet = await this.updateWallet({

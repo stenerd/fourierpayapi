@@ -8,11 +8,11 @@ exports.default = () => ({
     APP_DESC: 'Collect fast payment',
     APP_VER: '1.0',
     APP_TAG: 'FOP',
-    DB_URI: 'mongodb+srv://ofuzor:ofuzor2018@cluster0.qjl8f.mongodb.net/fourier-pay?retryWrites=true&w=majority',
+    DB_URI: 'mongodb+srv://ofuzor:ofuzor2018@cluster0.qjl8f.mongodb.net/fourierpay_prod?retryWrites=true&w=majority',
     DB_USERNAME: '',
     DB_PASSWORD: '',
     FRONTEND_BASEURL: 'https://fourierpay.com',
-    ADMIN_EMAIL: 'admin@fourierpay.com',
+    ADMIN_EMAIL: 'fourierpay@gmail.com',
     jwt: {
         JWT_AUTH_SECRET: 'jwtsecrete',
         EXPIRES_IN: '1d',

@@ -9,6 +9,7 @@ import { IJWTUser } from './auth.interface';
 import { EmailService } from 'src/email.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { SubscriptionService } from 'src/subscription/services/subscription.service';
+import { RoleEnum } from 'src/user/user.enum';
 
 @Injectable()
 export class AuthService {
@@ -63,6 +64,9 @@ export class AuthService {
     const get_user = await this.userService.findOne({ email: loginDto.email });
 
     if (!get_user)
+      throw new NotFoundException('Invalid email/password provided.');
+
+    if (get_user.role !== RoleEnum.ADMIN)
       throw new NotFoundException('Invalid email/password provided.');
     const passwordMatch = await this.comparePassword(
       loginDto.password,

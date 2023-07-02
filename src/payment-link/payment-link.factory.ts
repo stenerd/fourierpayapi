@@ -21,7 +21,7 @@ export class PaymentLinkFactory {
 
     payment_link.code = code;
     const charges =
-      +data.amount >= 2000 ? +data.amount * 0.02 + 100 : +data.amount * 0.02;
+      +data.amount >= 2000 ? +data.amount * 0.025 + 100 : +data.amount * 0.03;
 
     payment_link.charges = charges > 3000 ? 3000 : charges;
     payment_link.link = `${base_url}/pay/${code}`;

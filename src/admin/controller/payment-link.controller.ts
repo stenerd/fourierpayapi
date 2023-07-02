@@ -21,4 +21,13 @@ export class AdminPaymentLinkController extends CoreController {
     const resp = await this.adminPaymentLinkService.paymentLinks(query);
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
   }
+
+  @Get('count')
+  async paymentLinksCount(
+    @Res({ passthrough: true }) res: Response,
+    @Query() query: ViewPaymentLinkDto,
+  ) {
+    const resp = await this.adminPaymentLinkService.paymentLinksCount(query);
+    return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
+  }
 }

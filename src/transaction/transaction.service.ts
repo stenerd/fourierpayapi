@@ -386,8 +386,8 @@ export class TransactionService extends CoreService<TransactionRepository> {
             paystackTotal += 10;
           }
         } else {
-          if (+currentValue.amount > 3000) {
-            const amount = +currentValue.amount * 50 + +currentValue.amount;
+          if (+currentValue.amount < 3000) {
+            const amount = +currentValue.amount * 40 + +currentValue.amount;
             const paystackCharge = 0.015 * amount;
             paystackTotal += paystackCharge;
           } else {
@@ -447,7 +447,7 @@ export class TransactionService extends CoreService<TransactionRepository> {
             }
           } else {
             if (+currentValue.amount < 3000) {
-              const amount = +currentValue.amount * 50 + +currentValue.amount;
+              const amount = +currentValue.amount * 40 + +currentValue.amount;
               const paystackCharge = 0.015 * amount;
               lastPaystackTotal += paystackCharge;
             } else {

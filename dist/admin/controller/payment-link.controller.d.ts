@@ -6,4 +6,5 @@ export declare class AdminPaymentLinkController extends CoreController {
     private readonly adminPaymentLinkService;
     constructor(adminPaymentLinkService: AdminPaymentLinkService);
     paymentLinks(res: Response, query: ViewPaymentLinkDto): Promise<void>;
+    paymentLinksCount(res: Response, query: ViewPaymentLinkDto): Promise<void>;
 }

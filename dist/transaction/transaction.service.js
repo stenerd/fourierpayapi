@@ -297,8 +297,8 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
                 }
             }
             else {
-                if (+currentValue.amount > 3000) {
-                    const amount = +currentValue.amount * 50 + +currentValue.amount;
+                if (+currentValue.amount < 3000) {
+                    const amount = +currentValue.amount * 40 + +currentValue.amount;
                     const paystackCharge = 0.015 * amount;
                     paystackTotal += paystackCharge;
                 }
@@ -339,7 +339,7 @@ let TransactionService = class TransactionService extends service_core_1.CoreSer
                 }
                 else {
                     if (+currentValue.amount < 3000) {
-                        const amount = +currentValue.amount * 50 + +currentValue.amount;
+                        const amount = +currentValue.amount * 40 + +currentValue.amount;
                         const paystackCharge = 0.015 * amount;
                         lastPaystackTotal += paystackCharge;
                     }

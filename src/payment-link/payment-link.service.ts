@@ -22,6 +22,8 @@ import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { PaymentLink } from './models/payment-link.model';
 import { QRCodeService } from 'src/qrcode/qrcode.service';
 import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
+import { CheckDateDifference } from 'src/utils/date-formatter.util';
+import { addDays, format, parseISO, subDays } from 'date-fns';
 
 @Injectable()
 export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
@@ -424,25 +426,25 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
     }
 
     searchQuery = {
-      is_charges: false,
+      // is_charges: false,
       ...searchQuery,
       ...(query.startDate &&
         !query.endDate && {
           createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
+            $gte: new Date(query.startDate),
           },
         }),
       ...(!query.startDate &&
         query.endDate && {
           createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
+            $lte: new Date(query.endDate),
           },
         }),
       ...(query.startDate &&
         query.endDate && {
           createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
+            $lte: new Date(query.endDate),
+            $gte: new Date(query.startDate),
           },
         }),
     };
@@ -455,15 +457,96 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
       .count();
 
     const { page, perPage } = query;
-    const paymentLinks = await this.paymentLinkRepository
-      .model()
-      .find({
-        ...searchQuery,
-      })
-      .populate(['creator_id', 'link_id'])
-      .sort({ _id: -1 })
-      .skip(((+page || 1) - 1) * (+perPage || 10))
-      .limit(+perPage || 10);
+
+    const paymentLinks = await this.paymentLinkRepository.model().aggregate([
+      {
+        $match: {
+          ...searchQuery,
+        },
+      },
+      {
+        $lookup: {
+          from: 'users',
+          let: { creator_id: '$creator_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$_id', '$$creator_id'] } } },
+            { $limit: 1 },
+          ],
+          as: 'users',
+        },
+      },
+      {
+        $lookup: {
+          from: 'payments',
+          let: { payment_link_id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: ['$payment_link_id', '$$payment_link_id'],
+                },
+              },
+            },
+            {
+              $match: {
+                status: TransactionStatus.PAID,
+              },
+            },
+          ],
+          as: 'payments',
+        },
+      },
+      {
+        $addFields: {
+          user_details: '$users',
+          paymentCount: { $size: '$payments' },
+          totlaPayment: { $sum: '$payments.amount' },
+          totalCharges: { $sum: '$payments.charges' },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          creator_id: 1,
+          user_details: 1,
+          amount: 1,
+          charges: 1,
+          name: 1,
+          role: 1,
+          unique_field: 1,
+          link: 1,
+          expected_number_of_payments: 1,
+          status: 1,
+          activate_public_link: 1,
+          state: 1,
+          paymentCount: 1,
+          totlaPayment: 1,
+          totalCharges: 1,
+          createdAt: 1,
+        },
+      },
+      {
+        $sort: {
+          createdAt: -1, // Replace "fieldName" with the actual field name for ordering
+        },
+      },
+      {
+        $skip: ((+page || 1) - 1) * (+perPage || 10),
+      },
+      {
+        $limit: +perPage || 10,
+      },
+    ]);
+
+    // const paymentLinks = await this.paymentLinkRepository
+    //   .model()
+    //   .find({
+    //     ...searchQuery,
+    //   })
+    //   .populate(['creator_id', 'link_id'])
+    //   .sort({ _id: -1 })
+    //   .skip(((+page || 1) - 1) * (+perPage || 10))
+    //   .limit(+perPage || 10);
 
     return {
       data: paymentLinks,
@@ -471,6 +554,150 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
         total,
         page: +page || 1,
         lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+      },
+    };
+  }
+
+  async adminPaymentLinksCount(query: ViewPaymentLinkDto) {
+    let searchQuery: Record<string, any> = {};
+    if (query.q) {
+      searchQuery = {
+        name: { $regex: query.q, $options: 'i' },
+      };
+    }
+    if (query.status) {
+      searchQuery.status = query.status;
+    }
+
+    const searchAllQuery = {
+      ...searchQuery,
+      ...(query.startDate &&
+        !query.endDate && {
+          createdAt: {
+            $gte: new Date(query.startDate),
+          },
+        }),
+      ...(!query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate),
+          },
+        }),
+      ...(query.startDate &&
+        query.endDate && {
+          createdAt: {
+            $lte: new Date(query.endDate),
+            $gte: new Date(query.startDate),
+          },
+        }),
+    };
+
+    const searchPrivateQuery = {
+      state: PaymentLinkStateEnum.PRIVATE,
+      ...searchAllQuery,
+    };
+
+    const searchPublicQuery = {
+      state: PaymentLinkStateEnum.PUBLIC,
+      ...searchAllQuery,
+    };
+
+    const totalPrivate = await this.paymentLinkRepository
+      .model()
+      .find({
+        ...searchPrivateQuery,
+      })
+      .count();
+
+    const totalPublic = await this.paymentLinkRepository
+      .model()
+      .find({
+        ...searchPublicQuery,
+      })
+      .count();
+
+    const totalAll = await this.paymentLinkRepository
+      .model()
+      .find({
+        ...searchAllQuery,
+      })
+      .count();
+
+    let privatePercentage = 0;
+    let allPercentage = 0;
+    let publicPercentage = 0;
+
+    const checkLast = query.startDate && query.endDate;
+
+    if (!!checkLast) {
+      const getDifferenceInDays = CheckDateDifference(
+        query.startDate,
+        query.endDate,
+      );
+
+      const lastSearchQueries = {
+        ...searchQuery,
+        ...(query.startDate &&
+          query.endDate && {
+            createdAt: {
+              $gte: new Date(
+                format(
+                  subDays(parseISO(query.startDate), getDifferenceInDays),
+                  'yyyy-MM-dd',
+                ),
+              ).toISOString(),
+              $lte: new Date(query.startDate).toISOString(),
+            },
+          }),
+      };
+
+      const lastSearchPrivateQuery = {
+        ...lastSearchQueries,
+        state: PaymentLinkStateEnum.PRIVATE,
+      };
+
+      const lastSearchPublicQuery = {
+        ...lastSearchQueries,
+        state: PaymentLinkStateEnum.PUBLIC,
+      };
+
+      const lastTotalPrivate = await this.paymentLinkRepository
+        .model()
+        .find({
+          ...lastSearchPrivateQuery,
+        })
+        .count();
+
+      const lastTotalPublic = await this.paymentLinkRepository
+        .model()
+        .find({
+          ...lastSearchPublicQuery,
+        })
+        .count();
+
+      const lastTotalAll = await this.paymentLinkRepository
+        .model()
+        .find({
+          ...lastSearchQueries,
+        })
+        .count();
+
+      allPercentage = ((totalAll - lastTotalAll) / (lastTotalAll || 1)) * 100;
+      publicPercentage =
+        ((totalPublic - lastTotalPublic) / (lastTotalPublic || 1)) * 100;
+      privatePercentage =
+        ((totalPrivate - lastTotalPrivate) / (lastTotalPrivate || 1)) * 100;
+    }
+
+    return {
+      data: {
+        all: totalAll,
+        private: totalPrivate,
+        public: totalPublic,
+        allPercentage,
+        publicPercentage,
+        privatePercentage,
+        showPercent: !!checkLast,
       },
     };
   }

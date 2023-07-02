@@ -11,4 +11,9 @@ export class AdminPaymentLinkService {
     const resp = await this.paymentLinkService.adminPaymentLink(query);
     return resp;
   }
+
+  async paymentLinksCount(query: ViewPaymentLinkDto) {
+    const resp = await this.paymentLinkService.adminPaymentLinksCount(query);
+    return resp;
+  }
 }

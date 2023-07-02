@@ -24,6 +24,8 @@ const payer_sheet_repository_1 = require("./repositories/payer_sheet.repository"
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const transaction_enum_1 = require("../transaction/transaction.enum");
 const qrcode_service_1 = require("../qrcode/qrcode.service");
+const date_formatter_util_1 = require("../utils/date-formatter.util");
+const date_fns_1 = require("date-fns");
 let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreService {
     constructor(paymentLinkRepository, payerSheetRepository, paymentLinkFactory, linkService, configService, excelService, cloudinaryService, qRCodeService) {
         super(paymentLinkRepository);
@@ -304,21 +306,21 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
         if (query.state) {
             searchQuery.state = query.state;
         }
-        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({ is_charges: false }, searchQuery), (query.startDate &&
+        searchQuery = Object.assign(Object.assign(Object.assign(Object.assign({}, searchQuery), (query.startDate &&
             !query.endDate && {
             createdAt: {
-                $gte: new Date(query.startDate).toISOString(),
+                $gte: new Date(query.startDate),
             },
         })), (!query.startDate &&
             query.endDate && {
             createdAt: {
-                $lte: new Date(query.endDate).toISOString(),
+                $lte: new Date(query.endDate),
             },
         })), (query.startDate &&
             query.endDate && {
             createdAt: {
-                $lte: new Date(query.endDate).toISOString(),
-                $gte: new Date(query.startDate).toISOString(),
+                $lte: new Date(query.endDate),
+                $gte: new Date(query.startDate),
             },
         }));
         const total = await this.paymentLinkRepository
@@ -326,19 +328,175 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
             .find(Object.assign({}, searchQuery))
             .count();
         const { page, perPage } = query;
-        const paymentLinks = await this.paymentLinkRepository
-            .model()
-            .find(Object.assign({}, searchQuery))
-            .populate(['creator_id', 'link_id'])
-            .sort({ _id: -1 })
-            .skip(((+page || 1) - 1) * (+perPage || 10))
-            .limit(+perPage || 10);
+        const paymentLinks = await this.paymentLinkRepository.model().aggregate([
+            {
+                $match: Object.assign({}, searchQuery),
+            },
+            {
+                $lookup: {
+                    from: 'users',
+                    let: { creator_id: '$creator_id' },
+                    pipeline: [
+                        { $match: { $expr: { $eq: ['$_id', '$$creator_id'] } } },
+                        { $limit: 1 },
+                    ],
+                    as: 'users',
+                },
+            },
+            {
+                $lookup: {
+                    from: 'payments',
+                    let: { payment_link_id: '$_id' },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $eq: ['$payment_link_id', '$$payment_link_id'],
+                                },
+                            },
+                        },
+                        {
+                            $match: {
+                                status: transaction_enum_1.TransactionStatus.PAID,
+                            },
+                        },
+                    ],
+                    as: 'payments',
+                },
+            },
+            {
+                $addFields: {
+                    user_details: '$users',
+                    paymentCount: { $size: '$payments' },
+                    totlaPayment: { $sum: '$payments.amount' },
+                    totalCharges: { $sum: '$payments.charges' },
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    creator_id: 1,
+                    user_details: 1,
+                    amount: 1,
+                    charges: 1,
+                    name: 1,
+                    role: 1,
+                    unique_field: 1,
+                    link: 1,
+                    expected_number_of_payments: 1,
+                    status: 1,
+                    activate_public_link: 1,
+                    state: 1,
+                    paymentCount: 1,
+                    totlaPayment: 1,
+                    totalCharges: 1,
+                    createdAt: 1,
+                },
+            },
+            {
+                $sort: {
+                    createdAt: -1,
+                },
+            },
+            {
+                $skip: ((+page || 1) - 1) * (+perPage || 10),
+            },
+            {
+                $limit: +perPage || 10,
+            },
+        ]);
         return {
             data: paymentLinks,
             meta: {
                 total,
                 page: +page || 1,
                 lastPage: total === 0 ? 1 : Math.ceil(total / (+perPage || 10)),
+            },
+        };
+    }
+    async adminPaymentLinksCount(query) {
+        let searchQuery = {};
+        if (query.q) {
+            searchQuery = {
+                name: { $regex: query.q, $options: 'i' },
+            };
+        }
+        if (query.status) {
+            searchQuery.status = query.status;
+        }
+        const searchAllQuery = Object.assign(Object.assign(Object.assign(Object.assign({}, searchQuery), (query.startDate &&
+            !query.endDate && {
+            createdAt: {
+                $gte: new Date(query.startDate),
+            },
+        })), (!query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate),
+            },
+        })), (query.startDate &&
+            query.endDate && {
+            createdAt: {
+                $lte: new Date(query.endDate),
+                $gte: new Date(query.startDate),
+            },
+        }));
+        const searchPrivateQuery = Object.assign({ state: payment_link_enum_1.PaymentLinkStateEnum.PRIVATE }, searchAllQuery);
+        const searchPublicQuery = Object.assign({ state: payment_link_enum_1.PaymentLinkStateEnum.PUBLIC }, searchAllQuery);
+        const totalPrivate = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchPrivateQuery))
+            .count();
+        const totalPublic = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchPublicQuery))
+            .count();
+        const totalAll = await this.paymentLinkRepository
+            .model()
+            .find(Object.assign({}, searchAllQuery))
+            .count();
+        let privatePercentage = 0;
+        let allPercentage = 0;
+        let publicPercentage = 0;
+        const checkLast = query.startDate && query.endDate;
+        if (!!checkLast) {
+            const getDifferenceInDays = (0, date_formatter_util_1.CheckDateDifference)(query.startDate, query.endDate);
+            const lastSearchQueries = Object.assign(Object.assign({}, searchQuery), (query.startDate &&
+                query.endDate && {
+                createdAt: {
+                    $gte: new Date((0, date_fns_1.format)((0, date_fns_1.subDays)((0, date_fns_1.parseISO)(query.startDate), getDifferenceInDays), 'yyyy-MM-dd')).toISOString(),
+                    $lte: new Date(query.startDate).toISOString(),
+                },
+            }));
+            const lastSearchPrivateQuery = Object.assign(Object.assign({}, lastSearchQueries), { state: payment_link_enum_1.PaymentLinkStateEnum.PRIVATE });
+            const lastSearchPublicQuery = Object.assign(Object.assign({}, lastSearchQueries), { state: payment_link_enum_1.PaymentLinkStateEnum.PUBLIC });
+            const lastTotalPrivate = await this.paymentLinkRepository
+                .model()
+                .find(Object.assign({}, lastSearchPrivateQuery))
+                .count();
+            const lastTotalPublic = await this.paymentLinkRepository
+                .model()
+                .find(Object.assign({}, lastSearchPublicQuery))
+                .count();
+            const lastTotalAll = await this.paymentLinkRepository
+                .model()
+                .find(Object.assign({}, lastSearchQueries))
+                .count();
+            allPercentage = ((totalAll - lastTotalAll) / (lastTotalAll || 1)) * 100;
+            publicPercentage =
+                ((totalPublic - lastTotalPublic) / (lastTotalPublic || 1)) * 100;
+            privatePercentage =
+                ((totalPrivate - lastTotalPrivate) / (lastTotalPrivate || 1)) * 100;
+        }
+        return {
+            data: {
+                all: totalAll,
+                private: totalPrivate,
+                public: totalPublic,
+                allPercentage,
+                publicPercentage,
+                privatePercentage,
+                showPercent: !!checkLast,
             },
         };
     }

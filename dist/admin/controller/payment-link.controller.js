@@ -26,6 +26,10 @@ let AdminPaymentLinkController = class AdminPaymentLinkController extends contro
         const resp = await this.adminPaymentLinkService.paymentLinks(query);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
+    async paymentLinksCount(res, query) {
+        const resp = await this.adminPaymentLinkService.paymentLinksCount(query);
+        return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
+    }
 };
 __decorate([
     (0, common_1.Get)(''),
@@ -35,6 +39,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, create_payment_link_dto_1.ViewPaymentLinkDto]),
     __metadata("design:returntype", Promise)
 ], AdminPaymentLinkController.prototype, "paymentLinks", null);
+__decorate([
+    (0, common_1.Get)('count'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __param(1, (0, common_1.Query)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, create_payment_link_dto_1.ViewPaymentLinkDto]),
+    __metadata("design:returntype", Promise)
+], AdminPaymentLinkController.prototype, "paymentLinksCount", null);
 AdminPaymentLinkController = __decorate([
     (0, common_1.Controller)('admin/payment-links'),
     __metadata("design:paramtypes", [payment_link_service_1.AdminPaymentLinkService])

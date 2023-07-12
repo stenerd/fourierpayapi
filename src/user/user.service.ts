@@ -22,6 +22,7 @@ import { AllUserDto } from 'src/admin/dtos/user.dto';
 import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { CheckDateDifference } from 'src/utils/date-formatter.util';
+import { signUpHTML } from 'src/email-html/signup';
 import { addDays, format, parseISO, subDays } from 'date-fns';
 
 @Injectable()
@@ -75,16 +76,22 @@ export class UserService extends CoreService<UserRepository> {
       subscription_setting._id,
     );
 
-    this.emailService.sendMail(
-      this.mailerService,
-      user.email,
-      'Welcome',
-      'confirm-email',
-      {
-        firstname: user.firstname,
-        lastname: user.lastname,
-        token: user.token,
-      },
+    const emailData = {
+      name: `${user.firstname} ${user.lastname}`,
+      link: `https://fourierpay.com/login?token=${user.token}`,
+    };
+
+    this.emailService.sendBrevoMailAPI(
+      'welcome',
+      emailData,
+      signUpHTML(emailData),
+      [
+        {
+          name: `${user.firstname} ${user.lastname}`,
+          email: user.email,
+        },
+      ],
+      'Verify Your Email and Unlock the Power of Fourierpay!',
     );
 
     return user;

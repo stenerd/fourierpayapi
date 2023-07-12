@@ -10,6 +10,7 @@ import { PaystackModule } from 'src/paystack/paystack.module';
 import { WithdrawalModule } from 'src/withdrawal/withdrawal.module';
 import { UserSchema } from 'src/user/user.model';
 import { UserRepository } from 'src/user/user.repository';
+import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
 
 @Module({
   imports: [

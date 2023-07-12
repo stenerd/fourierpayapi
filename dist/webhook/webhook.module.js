@@ -6,35 +6,34 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentModule = void 0;
+exports.WebhookModule = void 0;
 const common_1 = require("@nestjs/common");
-const payment_service_1 = require("./payment.service");
-const payment_controller_1 = require("./payment.controller");
-const payment_repository_1 = require("./payment.repository");
-const user_module_1 = require("../user/user.module");
-const mongoose_1 = require("@nestjs/mongoose");
-const payment_model_1 = require("./payment.model");
 const transaction_module_1 = require("../transaction/transaction.module");
+const user_module_1 = require("../user/user.module");
 const paystack_module_1 = require("../paystack/paystack.module");
+const withdrawal_module_1 = require("../withdrawal/withdrawal.module");
 const payment_link_module_1 = require("../payment-link/payment-link.module");
-const payment_factory_1 = require("./payment.factory");
+const webhook_controller_1 = require("./webhook.controller");
+const webhook_service_1 = require("./webhook.service");
 const wallet_module_1 = require("../wallet/wallet.module");
-let PaymentModule = class PaymentModule {
+const payment_module_1 = require("../payment/payment.module");
+let WebhookModule = class WebhookModule {
 };
-PaymentModule = __decorate([
+WebhookModule = __decorate([
     (0, common_1.Module)({
         imports: [
             user_module_1.UserModule,
             transaction_module_1.TransactionModule,
-            wallet_module_1.WalletModule,
-            paystack_module_1.PaystackModule,
             payment_link_module_1.PaymentLinkModule,
-            mongoose_1.MongooseModule.forFeature([{ name: 'Payment', schema: payment_model_1.PaymentSchema }]),
+            paystack_module_1.PaystackModule,
+            withdrawal_module_1.WithdrawalModule,
+            wallet_module_1.WalletModule,
+            payment_module_1.PaymentModule,
         ],
-        controllers: [payment_controller_1.PaymentController],
-        providers: [payment_service_1.PaymentService, payment_repository_1.PaymentRepository, payment_factory_1.PaymentFactory],
-        exports: [payment_repository_1.PaymentRepository, payment_service_1.PaymentService],
+        controllers: [webhook_controller_1.WebhookController],
+        providers: [webhook_service_1.WebhookService],
+        exports: [webhook_service_1.WebhookService],
     })
-], PaymentModule);
-exports.PaymentModule = PaymentModule;
-//# sourceMappingURL=payment.module.js.map
+], WebhookModule);
+exports.WebhookModule = WebhookModule;
+//# sourceMappingURL=webhook.module.js.map

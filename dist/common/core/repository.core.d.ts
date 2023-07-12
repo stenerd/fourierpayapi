@@ -11,5 +11,6 @@ export declare abstract class CoreRepository<T extends Document> {
     newDocument<D>(data: D): T;
     model(): Model<T>;
     save(entity: any, options?: QueryOptions): Promise<T>;
+    saveData(entity: Record<string, any>, options?: QueryOptions): Promise<T>;
     populate(entity: any, path?: string | PopulateOptions | (string | PopulateOptions)[]): Promise<T>;
 }

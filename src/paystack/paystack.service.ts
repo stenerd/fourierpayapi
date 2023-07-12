@@ -44,10 +44,6 @@ export class PaystackService {
       },
     );
 
-    console.log('djfls >> ', {
-      Authorization: `Bearer ${this.configService.get('PAYSTACK_SECRET')}`,
-    });
-
     if (err) throw new BadRequestException(err.data ? err.data.message : err);
 
     return result;
@@ -65,17 +61,11 @@ export class PaystackService {
 
     if (err) throw new BadRequestException(err.data ? err.data.message : err);
 
-    console.log('result >> ', result);
-
-    console.log('result.data >> ', result.data);
-
     const payment_data = result.data;
     if (payment_data.status != 'success' && payment_data.status != 'abandoned')
       throw new BadRequestException(
         'Unable to verify paystack payment request',
       );
-
-    console.log('payment_data >> ', payment_data);
 
     return result.data;
   }
@@ -123,8 +113,6 @@ export class PaystackService {
 
     if (err) throw new BadRequestException(err.data ? err.data.message : err);
 
-    console.log('transferRecipient result >> ', result);
-
     return result.data;
   }
 
@@ -142,8 +130,6 @@ export class PaystackService {
       },
     );
     if (err) throw new BadRequestException(err.data ? err.data.message : err);
-
-    console.log('transfer >> ', result);
 
     return result.data;
   }

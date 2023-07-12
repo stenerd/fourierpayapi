@@ -25,6 +25,7 @@ import { QRCodeModule } from './qrcode/qrcode.module';
 import { JobModule } from './job/job.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
+import { WebhookModule } from './webhook/webhook.module';
 const config = configuration();
 
 @Module({
@@ -92,6 +93,7 @@ const config = configuration();
     QRCodeModule,
     JobModule,
     AdminModule,
+    WebhookModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

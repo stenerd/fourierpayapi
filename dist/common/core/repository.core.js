@@ -36,6 +36,9 @@ class CoreRepository {
     async save(entity, options) {
         return entity.save(options);
     }
+    async saveData(entity, options) {
+        return this.newDocument(entity).save(options);
+    }
     async populate(entity, path) {
         return entity.populate(path);
     }

@@ -26,9 +26,8 @@ let ExternalApiCalls = class ExternalApiCalls {
             const response = await axios_1.default.post(url, dataToPost, {
                 headers: axiosHeader,
             });
-            console.log('response >> ', response);
+            console.log('response >> ');
             result = await response.data;
-            console.log('response from Post Data function', result);
         }
         catch (error) {
             console.log('error >> ', error.response);
@@ -43,8 +42,7 @@ let ExternalApiCalls = class ExternalApiCalls {
         try {
             const response = await axios_1.default.get(url, { headers: axiosHeader });
             result = await response.data;
-            console.log('response >> ', response);
-            console.log('response from get Data function', result);
+            console.log('response >> ', result);
         }
         catch (error) {
             console.log('error >> ', error.response);

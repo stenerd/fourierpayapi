@@ -26,7 +26,7 @@ let PaymentLinkModule = class PaymentLinkModule {
 PaymentLinkModule = __decorate([
     (0, common_1.Module)({
         imports: [
-            user_module_1.UserModule,
+            (0, common_1.forwardRef)(() => user_module_1.UserModule),
             link_module_1.LinkModule,
             qrcode_module_1.QRCodeModule,
             mongoose_1.MongooseModule.forFeature([

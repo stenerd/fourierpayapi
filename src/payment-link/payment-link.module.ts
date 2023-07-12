@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PaymentLinkService } from './payment-link.service';
 import { PaymentLinkController } from './payment-link.controller';
 import { PaymentLinkSchema } from './models/payment-link.model';
@@ -15,7 +15,7 @@ import { QRCodeModule } from 'src/qrcode/qrcode.module';
 
 @Module({
   imports: [
-    UserModule,
+    forwardRef(() => UserModule),
     LinkModule,
     QRCodeModule,
     MongooseModule.forFeature([

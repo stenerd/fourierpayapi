@@ -43,9 +43,6 @@ let PaystackService = class PaystackService {
         const { result, err } = await this.call.postData(this.configService.get('INITIALIZE_PAYMENT_ENDPOINT'), payload, {
             Authorization: `Bearer ${this.configService.get('PAYSTACK_SECRET')}`,
         });
-        console.log('djfls >> ', {
-            Authorization: `Bearer ${this.configService.get('PAYSTACK_SECRET')}`,
-        });
         if (err)
             throw new common_1.BadRequestException(err.data ? err.data.message : err);
         return result;
@@ -56,12 +53,9 @@ let PaystackService = class PaystackService {
         });
         if (err)
             throw new common_1.BadRequestException(err.data ? err.data.message : err);
-        console.log('result >> ', result);
-        console.log('result.data >> ', result.data);
         const payment_data = result.data;
         if (payment_data.status != 'success' && payment_data.status != 'abandoned')
             throw new common_1.BadRequestException('Unable to verify paystack payment request');
-        console.log('payment_data >> ', payment_data);
         return result.data;
     }
     async fetchBankList() {
@@ -86,7 +80,6 @@ let PaystackService = class PaystackService {
         });
         if (err)
             throw new common_1.BadRequestException(err.data ? err.data.message : err);
-        console.log('transferRecipient result >> ', result);
         return result.data;
     }
     async transfer(recipient, amount) {
@@ -100,7 +93,6 @@ let PaystackService = class PaystackService {
         });
         if (err)
             throw new common_1.BadRequestException(err.data ? err.data.message : err);
-        console.log('transfer >> ', result);
         return result.data;
     }
 };

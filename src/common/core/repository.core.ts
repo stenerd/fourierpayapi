@@ -75,6 +75,13 @@ export abstract class CoreRepository<T extends Document> {
     return entity.save(options);
   }
 
+  async saveData(
+    entity: Record<string, any>,
+    options?: QueryOptions,
+  ): Promise<T> {
+    return this.newDocument(entity).save(options);
+  }
+
   async populate(
     entity: any,
     path?: string | PopulateOptions | (string | PopulateOptions)[],

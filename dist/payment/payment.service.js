@@ -35,7 +35,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         this.userService = userService;
     }
     async newPayment(data) {
-        console.log('data >> ', data);
         const payment = await this.paymentRepository.create(Object.assign({}, data));
         return payment;
     }
@@ -46,7 +45,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         }, {}, {
             populate: [{ path: 'creator_id' }],
         });
-        console.log('payment_link >> ', payment_link);
         if (!payment_link)
             throw new common_1.BadRequestException('payment link does not exist');
         let unique_answer = '';
@@ -108,7 +106,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
     }
     async verifyPayment(dto) {
         const result = await this.paystackService.verifyPayment(dto.reference);
-        console.log('process_verify_payment >> ', result);
         const { metadata, amount, } = result;
         console.log('amount >> ', amount, dto.reference);
         const transaction = await this.transactionService.findOne({
@@ -116,62 +113,111 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         });
         if (!transaction)
             throw new common_1.BadRequestException('Transaction does not exist');
-        if (result.status == 'success') {
-            const resp = await this.walletService.updateWallet({
-                user_id: transaction.reciever_id,
-                amount: transaction.amount,
-                type: transaction_enum_1.TransactionType.CREDIT,
+        if (transaction.status === transaction_enum_1.TransactionStatus.PAID) {
+            console.log('transaction.status === TransactionStatus.PAID >> ', transaction);
+            const pay = await this.findOne({
+                _id: transaction.in_entity_id,
             });
-            const transacionData = await this.transactionService.updateOne(transaction._id, {
-                status: transaction_enum_1.TransactionStatus.PAID,
-                out_entity_id: resp._id,
-                out_entity: transaction_enum_1.TransactionEntity.WALLET,
-            });
-            const payment = await this.updateOne(transaction.in_entity_id, {
-                status: transaction_enum_1.TransactionStatus.PAID,
-            });
-            const payment_link = await this.paymentLinkService.updateOne(transaction.payment_link_id, {
-                recieved_payment: true,
-            });
-            if (payment_link.state == payment_link_enum_1.PaymentLinkStateEnum.PRIVATE) {
-                await this.paymentLinkService.updatePayerInfo({
-                    payment_link_id: transaction.payment_link_id,
-                    unique_answer: payment.unique_answer,
-                }, {
-                    payment_id: payment._id,
-                    status: transaction_enum_1.TransactionStatus.PAID,
-                    payment_date: payment.createdAt,
-                });
-            }
-            if (amount / 100 > transaction.amount) {
-                const get_reference = await this.transactionService.generateReference();
-                const superAdmin = await this.userService.findOne({
-                    email: this.configService.get('ADMIN_EMAIL'),
-                });
-                const adminWallet = await this.walletService.updateWallet({
-                    user_id: superAdmin._id,
-                    amount: amount / 100 - transaction.amount,
-                    type: transaction_enum_1.TransactionType.CREDIT,
-                });
-                const trnx_payload = {
-                    amount: amount / 100 - transaction.amount,
-                    reciever_id: superAdmin._id,
-                    payment_link_id: transaction.payment_link_id,
-                    in_entity_id: transaction.in_entity_id,
-                    in_entity: transaction_enum_1.TransactionEntity.PAYMENT,
-                    reference: get_reference.reference,
-                    type: transaction_enum_1.TransactionType.CREDIT,
-                    status: transaction_enum_1.TransactionStatus.PAID,
-                    out_entity_id: adminWallet._id,
-                    out_entity: transaction_enum_1.TransactionEntity.WALLET,
-                    is_charges: true,
-                };
-                await this.transactionService.create(Object.assign({}, trnx_payload));
-            }
             return {
-                payment,
-                transaction: transacionData,
+                payment: pay,
+                transaction,
             };
+        }
+        if (result.status == 'success') {
+            const session = await this.paymentRepository.model().startSession();
+            session.startTransaction();
+            let transacionData = null;
+            let payment = null;
+            try {
+                const resp = await this.walletService.getRepository().findOneAndUpdate({ user_id: transaction.reciever_id }, {
+                    $inc: { amount: transaction.amount },
+                }, { session });
+                transacionData = await this.transactionService
+                    .getRepository()
+                    .findOneAndUpdate({ _id: transaction._id }, {
+                    status: transaction_enum_1.TransactionStatus.PAID,
+                    out_entity_id: resp._id,
+                    out_entity: transaction_enum_1.TransactionEntity.WALLET,
+                }, { session });
+                payment = await this.getRepository().findOneAndUpdate({ _id: transaction.in_entity_id }, {
+                    status: transaction_enum_1.TransactionStatus.PAID,
+                }, { session });
+                const payment_link = await this.paymentLinkService
+                    .getRepository()
+                    .findOneAndUpdate({ _id: transaction.payment_link_id }, {
+                    recieved_payment: true,
+                }, { session });
+                if (payment_link.state == payment_link_enum_1.PaymentLinkStateEnum.PRIVATE) {
+                    await this.paymentLinkService.getRepository().findOneAndUpdate({
+                        payment_link_id: transaction.payment_link_id,
+                        unique_answer: payment.unique_answer,
+                    }, {
+                        payment_id: payment._id,
+                        status: transaction_enum_1.TransactionStatus.PAID,
+                        payment_date: payment.createdAt,
+                    }, { session });
+                }
+                if (amount / 100 > transaction.amount) {
+                    const get_reference = await this.transactionService.generateReference();
+                    const superAdmin = await this.userService.findOne({
+                        email: this.configService.get('ADMIN_EMAIL'),
+                    });
+                    const adminWallet = await this.walletService
+                        .getRepository()
+                        .findOneAndUpdate({
+                        user_id: superAdmin._id,
+                    }, {
+                        $inc: { amount: amount / 100 - transaction.amount },
+                    }, { session });
+                    const trnx_payload = {
+                        amount: amount / 100 - transaction.amount,
+                        reciever_id: superAdmin._id,
+                        payment_link_id: transaction.payment_link_id,
+                        in_entity_id: transaction.in_entity_id,
+                        in_entity: transaction_enum_1.TransactionEntity.PAYMENT,
+                        reference: get_reference.reference,
+                        type: transaction_enum_1.TransactionType.CREDIT,
+                        status: transaction_enum_1.TransactionStatus.PAID,
+                        out_entity_id: adminWallet._id,
+                        out_entity: transaction_enum_1.TransactionEntity.WALLET,
+                        is_charges: true,
+                    };
+                    await this.transactionService
+                        .getRepository()
+                        .saveData(Object.assign({}, trnx_payload), { session });
+                }
+                const tranx = await this.transactionService.findOne({
+                    reference: dto.reference,
+                });
+                if (tranx.status === transaction_enum_1.TransactionStatus.PAID) {
+                    session.endSession();
+                    return {
+                        payment,
+                        transaction: transacionData,
+                    };
+                }
+                await session.commitTransaction();
+            }
+            catch (error) {
+                await session.abortTransaction();
+                throw new common_1.BadRequestException('Something went wrong!');
+            }
+            finally {
+                session.endSession();
+                if (!payment && !transacionData) {
+                    const pay = await this.findOne({
+                        _id: transaction.in_entity_id,
+                    });
+                    return {
+                        payment: pay,
+                        transaction,
+                    };
+                }
+                return {
+                    payment,
+                    transaction: transacionData,
+                };
+            }
         }
         else {
             const trans = await this.transactionService.updateOne(transaction._id, {
@@ -203,7 +249,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         };
     }
     async getPaymentByCode(code, query) {
-        console.log(' code >> ', code);
         const paymentLink = await this.paymentLinkService.findOne({
             code,
         });
@@ -265,7 +310,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         let numberOfRecipient = 0;
         for (let i = 0; i < payments.length; i++) {
             const payment = payments[i];
-            console.log('payment >> ', payment);
             if (payment.status === transaction_enum_1.TransactionStatus.PAID) {
                 recievedAmount += +payment.amount;
                 numberOfRecipient++;
@@ -376,7 +420,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         }, {}, {
             populate: ['in_entity_id'],
         });
-        console.log('transaction >> ', transaction);
         if (!transaction)
             throw new common_1.BadRequestException('reference does not exist');
         if (transaction.in_entity !== transaction_enum_1.TransactionEntity.PAYMENT)

@@ -24,6 +24,7 @@ const subscription_setting_service_1 = require("../subscription/services/subscri
 const subscription_enum_1 = require("../subscription/subscription.enum");
 const transaction_enum_1 = require("../transaction/transaction.enum");
 const date_formatter_util_1 = require("../utils/date-formatter.util");
+const signup_1 = require("../email-html/signup");
 const date_fns_1 = require("date-fns");
 let UserService = class UserService extends service_core_1.CoreService {
     constructor(userRepository, userFactory, walletService, subscriptionService, subscriptionSettingService, mailerService, emailService) {
@@ -63,11 +64,16 @@ let UserService = class UserService extends service_core_1.CoreService {
             active: true,
         });
         await this.subscriptionService.createSubscription(user._id, subscription_setting._id);
-        this.emailService.sendMail(this.mailerService, user.email, 'Welcome', 'confirm-email', {
-            firstname: user.firstname,
-            lastname: user.lastname,
-            token: user.token,
-        });
+        const emailData = {
+            name: `${user.firstname} ${user.lastname}`,
+            link: `https://fourierpay.com/login?token=${user.token}`,
+        };
+        this.emailService.sendBrevoMailAPI('welcome', emailData, (0, signup_1.signUpHTML)(emailData), [
+            {
+                name: `${user.firstname} ${user.lastname}`,
+                email: user.email,
+            },
+        ], 'Verify Your Email and Unlock the Power of Fourierpay!');
         return user;
     }
     async updateUser(data, user_id) {

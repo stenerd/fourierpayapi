@@ -22,6 +22,6 @@ import { WalletModule } from 'src/wallet/wallet.module';
   ],
   controllers: [PaymentController],
   providers: [PaymentService, PaymentRepository, PaymentFactory],
-  exports: [PaymentRepository],
+  exports: [PaymentRepository, PaymentService],
 })
 export class PaymentModule {}

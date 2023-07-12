@@ -33,6 +33,7 @@ const qrcode_module_1 = require("./qrcode/qrcode.module");
 const job_module_1 = require("./job/job.module");
 const schedule_1 = require("@nestjs/schedule");
 const admin_module_1 = require("./admin/admin.module");
+const webhook_module_1 = require("./webhook/webhook.module");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
@@ -101,6 +102,7 @@ AppModule = __decorate([
             qrcode_module_1.QRCodeModule,
             job_module_1.JobModule,
             admin_module_1.AdminModule,
+            webhook_module_1.WebhookModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

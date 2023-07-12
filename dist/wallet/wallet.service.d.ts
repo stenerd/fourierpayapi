@@ -18,6 +18,4 @@ export declare class WalletService extends CoreService<WalletRepository> {
     getWallet(user_id?: string): Promise<import("./wallet.model").WalletDocument>;
     computeCharges(amount: number): number;
     walletWithdraw(data: walletWithdrawalDto, user_id: string): Promise<any>;
-    webhook(body: Record<string, any>): Promise<void>;
-    successfulTransferWebhook(data: Record<string, any>): Promise<void>;
 }

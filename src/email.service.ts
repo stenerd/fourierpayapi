@@ -36,8 +36,7 @@ export class EmailService {
     subject: string,
   ) {
     let sendSmtpEmail = {};
-    const key =
-      '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';
+    const key = '';
 
     if (email_type === 'welcome') {
       sendSmtpEmail = {

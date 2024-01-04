@@ -28,5 +28,6 @@ declare const _default: () => {
     CLOUDINARY_API_KEY: string;
     CLOUDINARY_API_SECRET: string;
     CLOUDINARY_URL: string;
+    EMAIL_API_KEY: string;
 };
 export default _default;

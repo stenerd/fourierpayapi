@@ -1,6 +1,6 @@
 import { CoreService } from 'src/common/core/service.core';
 import { WalletService } from 'src/wallet/wallet.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateCompleteUserDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserFactory } from './user.factory';
 import { User } from './user.model';
@@ -22,7 +22,7 @@ export declare class UserService extends CoreService<UserRepository> {
     private readonly emailService;
     constructor(userRepository: UserRepository, userFactory: UserFactory, walletService: WalletService, subscriptionService: SubscriptionService, subscriptionSettingService: SubscriptionSettingService, mailerService: MailerService, emailService: EmailService);
     createSuperAcount(data: CreateUserDto): Promise<any>;
-    create(data: CreateUserDto): Promise<any>;
+    create(data: CreateCompleteUserDto): Promise<any>;
     updateUser(data: UpdateUserDto, user_id: string): Promise<any>;
     profile(user_id: string): Promise<User>;
     confirmEmail(token: string): Promise<any>;

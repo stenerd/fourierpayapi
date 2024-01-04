@@ -17,6 +17,7 @@ import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/create-auth.dto';
 import { LoginDto } from './dto/login.dto';
+import { RoleEnum } from 'src/user/user.enum';
 
 @Controller('auth')
 export class AuthController extends CoreController {
@@ -33,7 +34,11 @@ export class AuthController extends CoreController {
     @Body() createUserDto: CreateUserDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const user = await this.userService.create(createUserDto);
+    const user = await this.userService.create({
+      ...createUserDto,
+      role: RoleEnum.ADMIN,
+      role_id: 'to be changed',
+    });
     await this.linkService.createDefaultLinks(user._id, 10);
     return this.responseSuccess(
       res,

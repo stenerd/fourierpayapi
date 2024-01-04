@@ -32,5 +32,6 @@ exports.default = () => ({
     CLOUDINARY_API_KEY: '278232219894769',
     CLOUDINARY_API_SECRET: 'b7PdJhPvkDcIq2UDEf1dxg0qkEk',
     CLOUDINARY_URL: 'cloudinary://278232219894769:b7PdJhPvkDcIq2UDEf1dxg0qkEk@dokfqcv95',
+    EMAIL_API_KEY: process.env.EMAIL_API_KEY,
 });
 //# sourceMappingURL=configuration.js.map

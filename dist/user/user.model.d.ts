@@ -23,7 +23,7 @@
 /// <reference types="mongoose/types/virtuals" />
 /// <reference types="mongoose/types/inferschematype" />
 import { RoleEnum } from './user.enum';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 export type UserDocument = User & Document;
 export declare class User {
     _id?: any;
@@ -35,6 +35,7 @@ export declare class User {
     refreshToken?: string;
     token?: string;
     isActive?: boolean;
-    role?: RoleEnum;
+    role_id: Types.ObjectId;
+    role: RoleEnum;
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User>;

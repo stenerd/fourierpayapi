@@ -1,7 +1,7 @@
 // Third party libraries
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { RoleEnum } from './user.enum';
-import { Document } from 'mongoose';
+import { Document, SchemaTypes, Types } from 'mongoose';
 
 export type UserDocument = User & Document;
 
@@ -35,12 +35,14 @@ export class User {
   @Prop({ required: false, default: false })
   isActive?: boolean;
 
+  @Prop({ required: false, type: SchemaTypes.ObjectId, refPath: 'role' })
+  role_id: Types.ObjectId;
+
   @Prop({
     required: false,
     enum: RoleEnum,
-    default: RoleEnum.ADMIN,
   })
-  role?: RoleEnum;
+  role: RoleEnum;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

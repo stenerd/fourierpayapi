@@ -9,6 +9,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmailService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = require("axios");
+const configuration_1 = require("./config/configuration");
+const config = (0, configuration_1.default)();
 let EmailService = class EmailService {
     async sendMail(mailer, to, subject, template, data = {}, from = '') {
         console.log('__dirname >> ', __dirname, data);
@@ -20,13 +22,13 @@ let EmailService = class EmailService {
     }
     async sendBrevoMailAPI(email_type, data = {}, template, to, subject) {
         let sendSmtpEmail = {};
-        const key = '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';
+        const key = config.EMAIL_API_KEY;
         if (email_type === 'welcome') {
             sendSmtpEmail = {
                 to,
                 sender: {
-                    name: 'Fourier Pay',
-                    email: 'no-reply@fourierpay.com',
+                    name: 'Stenerd Technologies',
+                    email: 'stenerdlimited@gmail.com',
                 },
                 htmlContent: template,
                 subject,

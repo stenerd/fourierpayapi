@@ -40,8 +40,7 @@ let UserService = class UserService extends service_core_1.CoreService {
     async createSuperAcount(data) {
         if (await this.userRepository.findOne({ email: data.email }))
             throw new common_1.ConflictException('Email already exist');
-        const userAttribute = this.userFactory.createNew(data);
-        userAttribute.role = user_enum_1.RoleEnum.SUPERADMIN;
+        const userAttribute = this.userFactory.createNew(Object.assign(Object.assign({}, data), { role: user_enum_1.RoleEnum.SUPERADMIN, role_id: 'to be changed' }));
         userAttribute.isActive = true;
         delete userAttribute.token;
         const user = await this.userRepository.create(userAttribute);
@@ -63,6 +62,9 @@ let UserService = class UserService extends service_core_1.CoreService {
             tag: subscription_enum_1.SubscriptionTagEnum.BASIC,
             active: true,
         });
+        if (!subscription_setting) {
+            throw new common_1.InternalServerErrorException();
+        }
         await this.subscriptionService.createSubscription(user._id, subscription_setting._id);
         const emailData = {
             name: `${user.firstname} ${user.lastname}`,

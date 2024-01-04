@@ -6,6 +6,10 @@ var RoleEnum;
     RoleEnum["ADMIN"] = "Admin";
     RoleEnum["PAYER"] = "Payer";
     RoleEnum["SUPERADMIN"] = "SuperAdmin";
+    RoleEnum["SCHOOL"] = "School";
+    RoleEnum["UNIVERSITY"] = "University";
+    RoleEnum["SMEs"] = "SMEs";
+    RoleEnum["OTHERS"] = "Others";
 })(RoleEnum = exports.RoleEnum || (exports.RoleEnum = {}));
 var UserStatusEnum;
 (function (UserStatusEnum) {

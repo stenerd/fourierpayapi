@@ -7,3 +7,6 @@ export declare class CreateUserDto {
     password: string;
     role: RoleEnum;
 }
+export declare class CreateCompleteUserDto extends CreateUserDto {
+    role_id: string;
+}

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserSchema = exports.User = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const user_enum_1 = require("./user.enum");
+const mongoose_2 = require("mongoose");
 let User = class User {
 };
 __decorate([
@@ -47,10 +48,13 @@ __decorate([
     __metadata("design:type", Boolean)
 ], User.prototype, "isActive", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ required: false, type: mongoose_2.SchemaTypes.ObjectId, refPath: 'role' }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], User.prototype, "role_id", void 0);
+__decorate([
     (0, mongoose_1.Prop)({
         required: false,
         enum: user_enum_1.RoleEnum,
-        default: user_enum_1.RoleEnum.ADMIN,
     }),
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);

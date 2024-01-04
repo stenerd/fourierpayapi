@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
 import axios from 'axios';
+import configuration from './config/configuration';
+const config = configuration();
 
 @Injectable()
 export class EmailService {
@@ -36,14 +38,14 @@ export class EmailService {
     subject: string,
   ) {
     let sendSmtpEmail = {};
-    const key = '';
+    const key = config.EMAIL_API_KEY;
 
     if (email_type === 'welcome') {
       sendSmtpEmail = {
         to,
         sender: {
-          name: 'Fourier Pay',
-          email: 'no-reply@fourierpay.com',
+          name: 'Stenerd Technologies',
+          email: 'stenerdlimited@gmail.com',
         },
         htmlContent: template,
         subject,

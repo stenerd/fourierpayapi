@@ -67,3 +67,7 @@ export class CreateUserDto {
   @IsEnum(RoleEnum)
   role: RoleEnum;
 }
+
+export class CreateCompleteUserDto extends CreateUserDto {
+  role_id: string;
+}

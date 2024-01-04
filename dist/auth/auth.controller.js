@@ -21,6 +21,7 @@ const user_service_1 = require("../user/user.service");
 const auth_service_1 = require("./auth.service");
 const create_auth_dto_1 = require("./dto/create-auth.dto");
 const login_dto_1 = require("./dto/login.dto");
+const user_enum_1 = require("../user/user.enum");
 let AuthController = class AuthController extends controller_core_1.CoreController {
     constructor(authService, userService, linkService) {
         super();
@@ -29,7 +30,7 @@ let AuthController = class AuthController extends controller_core_1.CoreControll
         this.linkService = linkService;
     }
     async registration(createUserDto, res) {
-        const user = await this.userService.create(createUserDto);
+        const user = await this.userService.create(Object.assign(Object.assign({}, createUserDto), { role: user_enum_1.RoleEnum.ADMIN, role_id: 'to be changed' }));
         await this.linkService.createDefaultLinks(user._id, 10);
         return this.responseSuccess(res, '00', 'Success', createUserDto, common_1.HttpStatus.CREATED);
     }

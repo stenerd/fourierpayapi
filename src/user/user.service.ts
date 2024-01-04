@@ -2,10 +2,11 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { CoreService } from 'src/common/core/service.core';
 import { WalletService } from 'src/wallet/wallet.service';
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateCompleteUserDto, CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RoleEnum, UserStatusEnum } from './user.enum';
 import { UserFactory } from './user.factory';
@@ -43,8 +44,11 @@ export class UserService extends CoreService<UserRepository> {
     if (await this.userRepository.findOne({ email: data.email }))
       throw new ConflictException('Email already exist');
 
-    const userAttribute = this.userFactory.createNew(data);
-    userAttribute.role = RoleEnum.SUPERADMIN;
+    const userAttribute = this.userFactory.createNew({
+      ...data,
+      role: RoleEnum.SUPERADMIN,
+      role_id: 'to be changed',
+    });
     userAttribute.isActive = true;
     delete userAttribute.token;
     const user = await this.userRepository.create(userAttribute);
@@ -54,7 +58,7 @@ export class UserService extends CoreService<UserRepository> {
     });
   }
 
-  async create(data: CreateUserDto): Promise<any> {
+  async create(data: CreateCompleteUserDto): Promise<any> {
     if (await this.userRepository.findOne({ email: data.email }))
       throw new ConflictException('Email already exist');
 
@@ -70,6 +74,10 @@ export class UserService extends CoreService<UserRepository> {
         tag: SubscriptionTagEnum.BASIC,
         active: true,
       });
+
+    if (!subscription_setting) {
+      throw new InternalServerErrorException();
+    }
 
     await this.subscriptionService.createSubscription(
       user._id,

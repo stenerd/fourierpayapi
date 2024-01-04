@@ -1,4 +1,4 @@
-import { CreateUserDto } from './dto/create-user.dto';
+import { CreateCompleteUserDto } from './dto/create-user.dto';
 export declare class UserFactory {
-    createNew(data: CreateUserDto): Record<string, any>;
+    createNew(data: CreateCompleteUserDto): Record<string, any>;
 }

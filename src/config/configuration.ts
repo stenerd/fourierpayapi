@@ -42,4 +42,6 @@ export default () => ({
   // CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
   // CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET,
   // CLOUDINARY_URL: process.env.CLOUDINARY_URL,
+
+  EMAIL_API_KEY: process.env.EMAIL_API_KEY,
 });

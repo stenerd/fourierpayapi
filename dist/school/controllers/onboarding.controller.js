@@ -18,15 +18,18 @@ const controller_core_1 = require("../../common/core/controller.core");
 const link_service_1 = require("../../link/link.service");
 const onboarding_dto_1 = require("../dtos/onboarding.dto");
 const onboarding_service_1 = require("../services/onboarding.service");
+const school_session_service_1 = require("../../school-session/school-session.service");
 let SchoolOnboadingController = class SchoolOnboadingController extends controller_core_1.CoreController {
-    constructor(service, linkService) {
+    constructor(service, linkService, schoolSessionService) {
         super();
         this.service = service;
         this.linkService = linkService;
+        this.schoolSessionService = schoolSessionService;
     }
     async registration(schoolOnboardingDto, res) {
         const data = await this.service.createAccount(schoolOnboardingDto);
         await this.linkService.createDefaultLinks(data.user._id, 10);
+        await this.schoolSessionService.onboardingSchoolSession(data.school._id);
         return this.responseSuccess(res, '00', 'Success', schoolOnboardingDto, common_1.HttpStatus.CREATED);
     }
 };
@@ -41,7 +44,8 @@ __decorate([
 SchoolOnboadingController = __decorate([
     (0, common_1.Controller)('schools'),
     __metadata("design:paramtypes", [onboarding_service_1.SchoolOnboardingService,
-        link_service_1.LinkService])
+        link_service_1.LinkService,
+        school_session_service_1.SchoolSessionService])
 ], SchoolOnboadingController);
 exports.SchoolOnboadingController = SchoolOnboadingController;
 //# sourceMappingURL=onboarding.controller.js.map

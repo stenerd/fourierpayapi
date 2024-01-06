@@ -6,9 +6,10 @@ import { SchoolDataModule } from 'src/school-data/school-data.module';
 import { SchoolOnboardingFactory } from './factories/onboarding.factory';
 import { SchoolOnboardingService } from './services/onboarding.service';
 import { LinkModule } from 'src/link/link.module';
+import { SchoolSessionModule } from 'src/school-session/school-session.module';
 
 @Module({
-  imports: [UserModule, SchoolDataModule, LinkModule],
+  imports: [UserModule, SchoolDataModule, LinkModule, SchoolSessionModule],
   controllers: [SchoolOnboadingController],
   providers: [SchoolOnboardingFactory, SchoolOnboardingService],
 })

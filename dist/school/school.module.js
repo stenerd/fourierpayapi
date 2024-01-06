@@ -14,11 +14,12 @@ const school_data_module_1 = require("../school-data/school-data.module");
 const onboarding_factory_1 = require("./factories/onboarding.factory");
 const onboarding_service_1 = require("./services/onboarding.service");
 const link_module_1 = require("../link/link.module");
+const school_session_module_1 = require("../school-session/school-session.module");
 let SchoolModule = class SchoolModule {
 };
 SchoolModule = __decorate([
     (0, common_1.Module)({
-        imports: [user_module_1.UserModule, school_data_module_1.SchoolDataModule, link_module_1.LinkModule],
+        imports: [user_module_1.UserModule, school_data_module_1.SchoolDataModule, link_module_1.LinkModule, school_session_module_1.SchoolSessionModule],
         controllers: [onboarding_controller_1.SchoolOnboadingController],
         providers: [onboarding_factory_1.SchoolOnboardingFactory, onboarding_service_1.SchoolOnboardingService],
     })

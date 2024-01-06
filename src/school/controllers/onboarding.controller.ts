@@ -16,12 +16,14 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UserService } from 'src/user/user.service';
 import { SchoolOnboardingDto } from '../dtos/onboarding.dto';
 import { SchoolOnboardingService } from '../services/onboarding.service';
+import { SchoolSessionService } from 'src/school-session/school-session.service';
 
 @Controller('schools')
 export class SchoolOnboadingController extends CoreController {
   constructor(
     private readonly service: SchoolOnboardingService,
     private readonly linkService: LinkService,
+    private readonly schoolSessionService: SchoolSessionService,
   ) {
     super();
   }
@@ -33,6 +35,7 @@ export class SchoolOnboadingController extends CoreController {
   ) {
     const data = await this.service.createAccount(schoolOnboardingDto);
     await this.linkService.createDefaultLinks(data.user._id, 10);
+    await this.schoolSessionService.onboardingSchoolSession(data.school._id);
     return this.responseSuccess(
       res,
       '00',

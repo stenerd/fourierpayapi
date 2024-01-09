@@ -23,7 +23,7 @@ SchoolDataModule = __decorate([
             ]),
         ],
         providers: [school_data_service_1.SchoolDataService, school_data_repository_1.SchoolDataRepository, school_data_factory_1.SchoolDataFactory],
-        exports: [school_data_service_1.SchoolDataService, school_data_factory_1.SchoolDataFactory],
+        exports: [school_data_service_1.SchoolDataService, school_data_factory_1.SchoolDataFactory, school_data_repository_1.SchoolDataRepository],
     })
 ], SchoolDataModule);
 exports.SchoolDataModule = SchoolDataModule;

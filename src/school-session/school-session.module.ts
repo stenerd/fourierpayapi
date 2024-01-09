@@ -15,6 +15,8 @@ import { SchoolSessionService } from './school-session.service';
 import { SchoolTermRepository } from './repositories/school-term.repository';
 import { SchoolTermFactory } from './factories/school-term.factory';
 import { SchoolTermSchema } from './models/school-term.model';
+import { SchoolSessionController } from './school-session.controller';
+import { SchoolDataModule } from 'src/school-data/school-data.module';
 
 @Module({
   imports: [
@@ -22,9 +24,9 @@ import { SchoolTermSchema } from './models/school-term.model';
       { name: 'SchoolSessionSetting', schema: SchoolSessionSettingSchema },
       { name: 'SchoolSession', schema: SchoolSessionSchema },
       { name: 'SchoolTerm', schema: SchoolTermSchema },
-    ]),
+    ]),UserModule,SchoolDataModule
   ],
-  controllers: [],
+  controllers: [SchoolSessionController],
   providers: [
     SchoolSessionSettingRepository,
     SchoolSessionRepository,

@@ -12,6 +12,6 @@ import { SchoolDataFactory } from './school-data.factory';
     ]),
   ],
   providers: [SchoolDataService, SchoolDataRepository, SchoolDataFactory],
-  exports: [SchoolDataService, SchoolDataFactory],
+  exports: [SchoolDataService, SchoolDataFactory,SchoolDataRepository],
 })
 export class SchoolDataModule {}

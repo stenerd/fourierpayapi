@@ -28,6 +28,43 @@ let SchoolSessionService = class SchoolSessionService extends service_core_1.Cor
         this.schoolTermFactory = schoolTermFactory;
         this.schoolSessionSettingFactory = schoolSessionSettingFactory;
     }
+    async getSession(school_id) {
+        try {
+            const session = await this.repository.find({ school_id }, {}, { populate: [{ path: 'school_id' }, { path: 'session_setting_id' }] });
+            return session;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error);
+        }
+    }
+    async editSession(setting_id, data) {
+        try {
+            const updated_settings = await this.schoolSessionSettingRepository.findOneAndUpdate({ _id: setting_id }, data, {});
+            return updated_settings;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error);
+        }
+    }
+    async createSession(payload) {
+        try {
+            const data = await this.schoolSessionSettingRepository.findOne({
+                name: payload.data.name
+            });
+            if (data)
+                throw new common_1.ConflictException(`Session with name ${payload.data.name} has been created`);
+            const new_session_setting = await this.schoolSessionSettingFactory.createNew(payload.data);
+            const session_setting = await this.schoolSessionSettingRepository.create(new_session_setting);
+            const new_session = await this.createSchoolSession({
+                school_id: payload.school_id,
+                session_setting_id: session_setting._id
+            });
+            return new_session;
+        }
+        catch (error) {
+            throw new common_1.BadRequestException(error);
+        }
+    }
     async createSchoolSession(payload) {
         const school_session_setting = await this.schoolSessionSettingRepository.findOne({
             _id: payload.session_setting_id,

@@ -66,8 +66,8 @@ export class AuthService {
     if (!get_user)
       throw new NotFoundException('Invalid email/password provided.');
 
-    if (get_user.role !== RoleEnum.ADMIN)
-      throw new NotFoundException('Invalid email/password provided.');
+    // if (get_user.role !== RoleEnum.ADMIN)
+    //   throw new NotFoundException('Invalid email/password provided.');
     const passwordMatch = await this.comparePassword(
       loginDto.password,
       get_user.password,

@@ -8,6 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SchoolSessionModule = void 0;
 const common_1 = require("@nestjs/common");
+const user_module_1 = require("../user/user.module");
 const mongoose_1 = require("@nestjs/mongoose");
 const school_session_setting_model_1 = require("./models/school-session-setting.model");
 const school_session_model_1 = require("./models/school-session.model");
@@ -19,6 +20,8 @@ const school_session_service_1 = require("./school-session.service");
 const school_term_repository_1 = require("./repositories/school-term.repository");
 const school_term_factory_1 = require("./factories/school-term.factory");
 const school_term_model_1 = require("./models/school-term.model");
+const school_session_controller_1 = require("./school-session.controller");
+const school_data_module_1 = require("../school-data/school-data.module");
 let SchoolSessionModule = class SchoolSessionModule {
 };
 SchoolSessionModule = __decorate([
@@ -28,9 +31,9 @@ SchoolSessionModule = __decorate([
                 { name: 'SchoolSessionSetting', schema: school_session_setting_model_1.SchoolSessionSettingSchema },
                 { name: 'SchoolSession', schema: school_session_model_1.SchoolSessionSchema },
                 { name: 'SchoolTerm', schema: school_term_model_1.SchoolTermSchema },
-            ]),
+            ]), user_module_1.UserModule, school_data_module_1.SchoolDataModule
         ],
-        controllers: [],
+        controllers: [school_session_controller_1.SchoolSessionController],
         providers: [
             school_session_setting_repository_1.SchoolSessionSettingRepository,
             school_session_repository_1.SchoolSessionRepository,

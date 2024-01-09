@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateSchoolSessionSettingDto = void 0;
+exports.UpdateSchoolSessionSettingDto = exports.CreateSchoolSessionSettingDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class CreateSchoolSessionSettingDto {
@@ -35,7 +35,7 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: String,
-        description: 'School Session Setting Tag',
+        description: 'School Session Start Year',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
@@ -44,11 +44,14 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: String,
-        description: 'School Session Setting Tag',
+        description: 'School Session End Year',
     }),
     (0, class_validator_1.IsNotEmpty)(),
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateSchoolSessionSettingDto.prototype, "end_year", void 0);
 exports.CreateSchoolSessionSettingDto = CreateSchoolSessionSettingDto;
+class UpdateSchoolSessionSettingDto extends (0, swagger_1.PartialType)(CreateSchoolSessionSettingDto) {
+}
+exports.UpdateSchoolSessionSettingDto = UpdateSchoolSessionSettingDto;
 //# sourceMappingURL=school-session.dto.js.map

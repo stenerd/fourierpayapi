@@ -1,5 +1,10 @@
+import { CreateSchoolSessionSettingDto } from '../dtos/school-session.dto';
 import { SchoolSession } from '../models/school-session.model';
 import { SchoolTerm } from '../models/school-term.model';
+export interface ICreateSessionPayload {
+    school_id: string;
+    data: CreateSchoolSessionSettingDto;
+}
 export interface ISchoolSessionPayload {
     school_id: string;
     session_setting_id: string;

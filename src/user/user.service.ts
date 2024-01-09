@@ -25,6 +25,7 @@ import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { CheckDateDifference } from 'src/utils/date-formatter.util';
 import { signUpHTML } from 'src/email-html/signup';
 import { addDays, format, parseISO, subDays } from 'date-fns';
+import { resetpasswordHTML } from 'src/email-html/reset-password';
 
 @Injectable()
 export class UserService extends CoreService<UserRepository> {
@@ -135,6 +136,26 @@ export class UserService extends CoreService<UserRepository> {
 
     get_user.token = null;
     get_user.password = dto.password;
+
+    const emailData = {
+      name: `${get_user.firstname} ${get_user.lastname}`,
+      link: `https://fourierpay.com/reset_password?token=${get_user.token}`,
+    };
+
+
+    this.emailService.sendBrevoMailAPI(
+      'reset_password',
+      emailData,
+      resetpasswordHTML(emailData),
+      [
+        {
+          name: `${get_user.firstname} ${get_user.lastname}`,
+          email: get_user.email,
+        },
+      ],
+      'Verify Your Email and Unlock the Power of Fourierpay!',
+    );
+
     return await this.userRepository.save(get_user);
   }
 
@@ -162,23 +183,23 @@ export class UserService extends CoreService<UserRepository> {
       ...searchQuery,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate),
-            $gte: new Date(query.startDate),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate),
+          $gte: new Date(query.startDate),
+        },
+      }),
     };
 
     const total = await this.userRepository
@@ -338,23 +359,23 @@ export class UserService extends CoreService<UserRepository> {
       isActive: true,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const searchInActiveQuery = {
@@ -362,46 +383,46 @@ export class UserService extends CoreService<UserRepository> {
       isActive: false,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const searchAllQuery = {
       ...searchQuery,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const totalActive = await this.userRepository
@@ -441,16 +462,16 @@ export class UserService extends CoreService<UserRepository> {
         ...searchQuery,
         ...(query.startDate &&
           query.endDate && {
-            createdAt: {
-              $gte: new Date(
-                format(
-                  subDays(parseISO(query.startDate), getDifferenceInDays),
-                  'yyyy-MM-dd',
-                ),
-              ).toISOString(),
-              $lte: new Date(query.startDate).toISOString(),
-            },
-          }),
+          createdAt: {
+            $gte: new Date(
+              format(
+                subDays(parseISO(query.startDate), getDifferenceInDays),
+                'yyyy-MM-dd',
+              ),
+            ).toISOString(),
+            $lte: new Date(query.startDate).toISOString(),
+          },
+        }),
       };
 
       const lastSearchActiveQuery = {
@@ -508,23 +529,23 @@ export class UserService extends CoreService<UserRepository> {
     const searchAllQuery = {
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const totalAll = await this.userRepository

@@ -26,6 +26,7 @@ const transaction_enum_1 = require("../transaction/transaction.enum");
 const date_formatter_util_1 = require("../utils/date-formatter.util");
 const signup_1 = require("../email-html/signup");
 const date_fns_1 = require("date-fns");
+const reset_password_1 = require("../email-html/reset-password");
 let UserService = class UserService extends service_core_1.CoreService {
     constructor(userRepository, userFactory, walletService, subscriptionService, subscriptionSettingService, mailerService, emailService) {
         super(userRepository);
@@ -99,6 +100,16 @@ let UserService = class UserService extends service_core_1.CoreService {
             throw new common_1.BadRequestException('invalid request');
         get_user.token = null;
         get_user.password = dto.password;
+        const emailData = {
+            name: `${get_user.firstname} ${get_user.lastname}`,
+            link: `https://fourierpay.com/reset_password?token=${get_user.token}`,
+        };
+        this.emailService.sendBrevoMailAPI('reset_password', emailData, (0, reset_password_1.resetpasswordHTML)(emailData), [
+            {
+                name: `${get_user.firstname} ${get_user.lastname}`,
+                email: get_user.email,
+            },
+        ], 'Verify Your Email and Unlock the Power of Fourierpay!');
         return await this.userRepository.save(get_user);
     }
     async updateToken(query) {

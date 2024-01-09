@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateSchoolSessionSettingDto {
@@ -20,7 +20,7 @@ export class CreateSchoolSessionSettingDto {
 
   @ApiProperty({
     type: String,
-    description: 'School Session Setting Tag',
+    description: 'School Session Start Year',
   })
   @IsNotEmpty()
   @IsString()
@@ -28,13 +28,14 @@ export class CreateSchoolSessionSettingDto {
 
   @ApiProperty({
     type: String,
-    description: 'School Session Setting Tag',
+    description: 'School Session End Year',
   })
   @IsNotEmpty()
   @IsString()
   end_year: string;
 }
 
+export class UpdateSchoolSessionSettingDto extends PartialType(CreateSchoolSessionSettingDto) { }
 // export class FetchSubscriptionSettingFilterDto {
 //   @ApiProperty()
 //   @IsEnum(FetchSubscriptionSettingFilterEnum)

@@ -16,7 +16,6 @@ const bcrypt = require("bcrypt");
 const jwt_1 = require("@nestjs/jwt");
 const email_service_1 = require("../email.service");
 const mailer_1 = require("@nestjs-modules/mailer");
-const user_enum_1 = require("../user/user.enum");
 let AuthService = class AuthService {
     constructor(userService, jwtService, mailerService, emailService) {
         this.userService = userService;
@@ -46,8 +45,6 @@ let AuthService = class AuthService {
     async login(loginDto) {
         const get_user = await this.userService.findOne({ email: loginDto.email });
         if (!get_user)
-            throw new common_1.NotFoundException('Invalid email/password provided.');
-        if (get_user.role !== user_enum_1.RoleEnum.ADMIN)
             throw new common_1.NotFoundException('Invalid email/password provided.');
         const passwordMatch = await this.comparePassword(loginDto.password, get_user.password);
         if (!passwordMatch) {

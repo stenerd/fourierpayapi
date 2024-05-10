@@ -37,7 +37,7 @@ export class AuthController extends CoreController {
     const user = await this.userService.create({
       ...createUserDto,
       role: RoleEnum.ADMIN,
-      role_id: 'to be changed',
+      // role_id: 'to be changed',
     });
     await this.linkService.createDefaultLinks(user._id, 10);
     return this.responseSuccess(

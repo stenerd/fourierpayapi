@@ -44,4 +44,6 @@ export default () => ({
   // CLOUDINARY_URL: process.env.CLOUDINARY_URL,
 
   EMAIL_API_KEY: process.env.EMAIL_API_KEY,
+
+  APITOKEN: process.env.APITOKEN,
 });

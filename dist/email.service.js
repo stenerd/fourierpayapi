@@ -10,6 +10,7 @@ exports.EmailService = void 0;
 const common_1 = require("@nestjs/common");
 const axios_1 = require("axios");
 const configuration_1 = require("./config/configuration");
+const nodemailer_1 = require("nodemailer");
 const config = (0, configuration_1.default)();
 let EmailService = class EmailService {
     async sendMail(mailer, to, subject, template, data = {}, from = '') {
@@ -44,6 +45,39 @@ let EmailService = class EmailService {
                 },
             });
             console.log('resp >> ', resp);
+        }
+        catch (error) {
+            console.log(';error >> ', error);
+        }
+    }
+    async sendMailtrapMailAPI(email_type, data = {}, template, to, subject) {
+        let mailOptions = {};
+        const key = config.EMAIL_API_KEY;
+        const API_TOKEN = config.APITOKEN;
+        if (email_type === 'welcome') {
+            mailOptions = {
+                to,
+                from: '"FourierPay Group" no-reply@fourierpay.com',
+                html: template,
+                subject,
+            };
+        }
+        try {
+            console.log('sendSmtpEmail >> ', mailOptions);
+            const transport = (0, nodemailer_1.createTransport)({
+                host: 'sandbox.smtp.mailtrap.io',
+                port: 2525,
+                auth: {
+                    user: 'd1100bf4de921c',
+                    pass: '960a7cdd64e78c',
+                },
+            });
+            transport.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    return console.log('error >> ', error);
+                }
+                console.log('Message sent: %s', info.messageId);
+            });
         }
         catch (error) {
             console.log(';error >> ', error);

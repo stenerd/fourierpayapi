@@ -69,5 +69,5 @@ export class CreateUserDto {
 }
 
 export class CreateCompleteUserDto extends CreateUserDto {
-  role_id: string;
+  // role_id: string;
 }

@@ -24,7 +24,7 @@ const subscription_setting_service_1 = require("../subscription/services/subscri
 const subscription_enum_1 = require("../subscription/subscription.enum");
 const transaction_enum_1 = require("../transaction/transaction.enum");
 const date_formatter_util_1 = require("../utils/date-formatter.util");
-const signup_1 = require("../email-html/signup");
+const welcome_1 = require("../email-html/welcome");
 const date_fns_1 = require("date-fns");
 let UserService = class UserService extends service_core_1.CoreService {
     constructor(userRepository, userFactory, walletService, subscriptionService, subscriptionSettingService, mailerService, emailService) {
@@ -40,7 +40,7 @@ let UserService = class UserService extends service_core_1.CoreService {
     async createSuperAcount(data) {
         if (await this.userRepository.findOne({ email: data.email }))
             throw new common_1.ConflictException('Email already exist');
-        const userAttribute = this.userFactory.createNew(Object.assign(Object.assign({}, data), { role: user_enum_1.RoleEnum.SUPERADMIN, role_id: 'to be changed' }));
+        const userAttribute = this.userFactory.createNew(Object.assign(Object.assign({}, data), { role: user_enum_1.RoleEnum.SUPERADMIN }));
         userAttribute.isActive = true;
         delete userAttribute.token;
         const user = await this.userRepository.create(userAttribute);
@@ -70,12 +70,7 @@ let UserService = class UserService extends service_core_1.CoreService {
             name: `${user.firstname} ${user.lastname}`,
             link: `https://fourierpay.com/login?token=${user.token}`,
         };
-        this.emailService.sendBrevoMailAPI('welcome', emailData, (0, signup_1.signUpHTML)(emailData), [
-            {
-                name: `${user.firstname} ${user.lastname}`,
-                email: user.email,
-            },
-        ], 'Verify Your Email and Unlock the Power of Fourierpay!');
+        this.emailService.sendMailtrapMailAPI('welcome', emailData, (0, welcome_1.welcomeHTML)(emailData), user.email, 'Verify Your Email and Unlock the Power of Fourierpay!');
         return user;
     }
     async updateUser(data, user_id) {

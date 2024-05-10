@@ -24,6 +24,7 @@ import { CoreSearchFilterDatePaginationDto } from 'src/common/core/dto.core';
 import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { CheckDateDifference } from 'src/utils/date-formatter.util';
 import { signUpHTML } from 'src/email-html/signup';
+import { welcomeHTML } from 'src/email-html/welcome';
 import { addDays, format, parseISO, subDays } from 'date-fns';
 
 @Injectable()
@@ -47,7 +48,7 @@ export class UserService extends CoreService<UserRepository> {
     const userAttribute = this.userFactory.createNew({
       ...data,
       role: RoleEnum.SUPERADMIN,
-      role_id: 'to be changed',
+      // role_id: 'to be changed',
     });
     userAttribute.isActive = true;
     delete userAttribute.token;
@@ -89,16 +90,24 @@ export class UserService extends CoreService<UserRepository> {
       link: `https://fourierpay.com/login?token=${user.token}`,
     };
 
-    this.emailService.sendBrevoMailAPI(
+    // this.emailService.sendBrevoMailAPI(
+    //   'welcome',
+    //   emailData,
+    //   signUpHTML(emailData),
+    //   [
+    //     {
+    //       name: `${user.firstname} ${user.lastname}`,
+    //       email: user.email,
+    //     },
+    //   ],
+    //   'Verify Your Email and Unlock the Power of Fourierpay!',
+    // );
+
+    this.emailService.sendMailtrapMailAPI(
       'welcome',
       emailData,
-      signUpHTML(emailData),
-      [
-        {
-          name: `${user.firstname} ${user.lastname}`,
-          email: user.email,
-        },
-      ],
+      welcomeHTML(emailData),
+      user.email,
       'Verify Your Email and Unlock the Power of Fourierpay!',
     );
 

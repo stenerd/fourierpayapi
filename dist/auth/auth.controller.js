@@ -30,7 +30,7 @@ let AuthController = class AuthController extends controller_core_1.CoreControll
         this.linkService = linkService;
     }
     async registration(createUserDto, res) {
-        const user = await this.userService.create(Object.assign(Object.assign({}, createUserDto), { role: user_enum_1.RoleEnum.ADMIN, role_id: 'to be changed' }));
+        const user = await this.userService.create(Object.assign(Object.assign({}, createUserDto), { role: user_enum_1.RoleEnum.ADMIN }));
         await this.linkService.createDefaultLinks(user._id, 10);
         return this.responseSuccess(res, '00', 'Success', createUserDto, common_1.HttpStatus.CREATED);
     }

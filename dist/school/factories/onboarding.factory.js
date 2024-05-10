@@ -19,7 +19,6 @@ let SchoolOnboardingFactory = class SchoolOnboardingFactory {
             phonenumber: data.school_mobile_number,
             password: data.password,
             role: user_enum_1.RoleEnum.SCHOOL,
-            role_id,
         };
         return user_data;
     }

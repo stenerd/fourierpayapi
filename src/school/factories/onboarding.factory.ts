@@ -17,7 +17,7 @@ export class SchoolOnboardingFactory {
       phonenumber: data.school_mobile_number,
       password: data.password,
       role: RoleEnum.SCHOOL,
-      role_id,
+      // role_id,
     };
 
     return user_data;

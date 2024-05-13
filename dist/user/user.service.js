@@ -68,7 +68,7 @@ let UserService = class UserService extends service_core_1.CoreService {
         await this.subscriptionService.createSubscription(user._id, subscription_setting._id);
         const emailData = {
             name: `${user.firstname} ${user.lastname}`,
-            link: `https://fourierpay.com/login?token=${user.token}`,
+            link: `https://app.fourierpay.com/login?token=${user.token}`,
         };
         this.emailService.sendMailtrapMailAPI('welcome', emailData, (0, welcome_1.welcomeHTML)(emailData), user.email, 'Verify Your Email and Unlock the Power of Fourierpay!');
         return user;

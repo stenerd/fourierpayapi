@@ -87,7 +87,7 @@ export class UserService extends CoreService<UserRepository> {
 
     const emailData = {
       name: `${user.firstname} ${user.lastname}`,
-      link: `https://fourierpay.com/login?token=${user.token}`,
+      link: `https://app.fourierpay.com/login?token=${user.token}`,
     };
 
     // this.emailService.sendBrevoMailAPI(

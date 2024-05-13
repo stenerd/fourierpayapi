@@ -11,7 +11,7 @@ export default () => ({
     'mongodb+srv://ofuzor:ofuzor2018@cluster0.qjl8f.mongodb.net/fourierpay_prod?retryWrites=true&w=majority',
   DB_USERNAME: '',
   DB_PASSWORD: '',
-  FRONTEND_BASEURL: 'https://fourierpay.com',
+  FRONTEND_BASEURL: 'https://app.fourierpay.com',
   ADMIN_EMAIL: 'fourierpay@gmail.com',
   jwt: {
     JWT_AUTH_SECRET: 'jwtsecrete',

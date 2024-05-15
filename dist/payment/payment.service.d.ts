@@ -1,28 +1,3 @@
-/// <reference types="mongoose/types/aggregate" />
-/// <reference types="mongoose/types/callback" />
-/// <reference types="mongoose/types/collection" />
-/// <reference types="mongoose/types/connection" />
-/// <reference types="mongoose/types/cursor" />
-/// <reference types="mongoose/types/document" />
-/// <reference types="mongoose/types/error" />
-/// <reference types="mongoose/types/expressions" />
-/// <reference types="mongoose/types/helpers" />
-/// <reference types="mongoose/types/middlewares" />
-/// <reference types="mongoose/types/indexes" />
-/// <reference types="mongoose/types/models" />
-/// <reference types="mongoose/types/mongooseoptions" />
-/// <reference types="mongoose/types/pipelinestage" />
-/// <reference types="mongoose/types/populate" />
-/// <reference types="mongoose/types/query" />
-/// <reference types="mongoose/types/schemaoptions" />
-/// <reference types="mongoose/types/schematypes" />
-/// <reference types="mongoose/types/session" />
-/// <reference types="mongoose/types/types" />
-/// <reference types="mongoose/types/utility" />
-/// <reference types="mongoose/types/validation" />
-/// <reference types="mongoose/types/virtuals" />
-/// <reference types="mongoose" />
-/// <reference types="mongoose/types/inferschematype" />
 import { ConfigService } from '@nestjs/config';
 import { CoreService } from 'src/common/core/service.core';
 import { PaymentLinkService } from 'src/payment-link/payment-link.service';
@@ -51,7 +26,7 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
     initializePayment(dto: InitializePaymentDto): Promise<Record<string, any>>;
     verifyPayment(dto: VerifyPaymentDto): Promise<Record<string, any>>;
     abandonPayment(dto: VerifyPaymentDto): Promise<Record<string, any>>;
-    getPaymentByCode(code: any, query: ViewPaymentDto): Promise<{
+    getPaymentByCode(code: any, query: ViewPaymentDto | Record<string, any>): Promise<{
         data: {
             payments: Omit<Payment & import("mongoose").Document<any, any, any> & {
                 _id: import("mongoose").Types.ObjectId;
@@ -95,5 +70,8 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
             lastPage: number;
         };
     }>;
-    getPaymentReference(reference: any): Promise<any>;
+    getPaymentReference(reference: any): Promise<{
+        transaction: any;
+        payment_link: any;
+    }>;
 }

@@ -420,11 +420,16 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         }, {}, {
             populate: ['in_entity_id'],
         });
+        console.log('transaction >> ', transaction);
         if (!transaction)
             throw new common_1.BadRequestException('reference does not exist');
         if (transaction.in_entity !== transaction_enum_1.TransactionEntity.PAYMENT)
             throw new common_1.BadRequestException('reference is not valid');
-        return transaction;
+        const payment_link = await this.paymentLinkService.findOne({
+            _id: transaction.payment_link_id,
+        });
+        console.log('payment_link >> ', payment_link);
+        return { transaction, payment_link };
     }
 };
 PaymentService = __decorate([

@@ -367,7 +367,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
     };
   }
 
-  async getPaymentByCode(code, query: ViewPaymentDto) {
+  async getPaymentByCode(code, query: ViewPaymentDto | Record<string, any>) {
     const paymentLink = await this.paymentLinkService.findOne({
       code,
     });
@@ -595,10 +595,22 @@ export class PaymentService extends CoreService<PaymentRepository> {
       },
     );
 
+    console.log('transaction >> ', transaction);
+
     if (!transaction) throw new BadRequestException('reference does not exist');
     if (transaction.in_entity !== TransactionEntity.PAYMENT)
       throw new BadRequestException('reference is not valid');
 
-    return transaction;
+    const payment_link = await this.paymentLinkService.findOne({
+      _id: transaction.payment_link_id,
+    });
+
+    // const data_payment = await this.getPaymentByCode(payment_link.code, {});
+
+    console.log('payment_link >> ', payment_link);
+
+    // console.log('data_payment >> ', data_payment);
+
+    return { transaction, payment_link };
   }
 }

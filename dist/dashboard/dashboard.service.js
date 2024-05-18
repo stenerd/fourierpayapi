@@ -66,7 +66,9 @@ let DashboardService = class DashboardService {
     async getProfileTables(user_id = null) {
         const recentTransaction = await this.transactionRepository
             .model()
-            .find(Object.assign({}, (user_id ? { reciever_id: user_id } : {})))
+            .find(Object.assign({}, (user_id
+            ? { reciever_id: user_id, status: transaction_enum_1.TransactionStatus.PAID }
+            : {})))
             .populate([
             'reciever_id',
             'in_entity_id',

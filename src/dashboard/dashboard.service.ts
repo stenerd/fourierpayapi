@@ -93,7 +93,9 @@ export class DashboardService {
     const recentTransaction = await this.transactionRepository
       .model()
       .find({
-        ...(user_id ? { reciever_id: user_id } : {}),
+        ...(user_id
+          ? { reciever_id: user_id, status: TransactionStatus.PAID }
+          : {}),
       })
       .populate([
         'reciever_id',

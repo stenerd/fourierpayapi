@@ -49,7 +49,7 @@ let DashboardService = class DashboardService {
         console.log(' user_id >> ', user_id);
         const recentPayments = await this.paymentRepository
             .model()
-            .find(Object.assign({}, (user_id ? { reciever_id: user_id } : {})))
+            .find(Object.assign({ status: transaction_enum_1.TransactionStatus.PAID }, (user_id ? { reciever_id: user_id } : {})))
             .populate(['transaction_id', 'payment_link_id'])
             .sort({ _id: -1 })
             .limit(3);

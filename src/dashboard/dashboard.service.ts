@@ -69,7 +69,7 @@ export class DashboardService {
     const recentPayments = await this.paymentRepository
       .model()
       .find({
-        // status: TransactionStatus.PAID,
+        status: TransactionStatus.PAID,
         ...(user_id ? { reciever_id: user_id } : {}),
       })
       .populate(['transaction_id', 'payment_link_id'])

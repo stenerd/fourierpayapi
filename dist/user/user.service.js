@@ -26,6 +26,7 @@ const transaction_enum_1 = require("../transaction/transaction.enum");
 const date_formatter_util_1 = require("../utils/date-formatter.util");
 const welcome_1 = require("../email-html/welcome");
 const date_fns_1 = require("date-fns");
+const bcrypt = require("bcrypt");
 let UserService = class UserService extends service_core_1.CoreService {
     constructor(userRepository, userFactory, walletService, subscriptionService, subscriptionSettingService, mailerService, emailService) {
         super(userRepository);
@@ -78,6 +79,19 @@ let UserService = class UserService extends service_core_1.CoreService {
     }
     async profile(user_id) {
         return await this.findOne({ _id: user_id });
+    }
+    async comparePassword(password, hash) {
+        return await bcrypt.compare(password, hash);
+    }
+    async resetUserPassword(reset, id) {
+        const user = await this.findOne({ _id: id });
+        if (!user)
+            throw new common_1.BadRequestException("Invalid Request");
+        const passwordMatch = await this.comparePassword(reset.currentPassword, user.password);
+        if (!passwordMatch)
+            throw new common_1.ConflictException("Incorrect Password");
+        user.password = reset.newPassword;
+        return await this.userRepository.save(user);
     }
     async confirmEmail(token) {
         const get_user = await this.findOne({ token });

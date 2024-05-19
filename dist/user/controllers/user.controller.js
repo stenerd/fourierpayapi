@@ -23,6 +23,7 @@ const current_user_decorator_1 = require("../../common/decorators/current-user.d
 const current_subscription_decorator_1 = require("../../common/decorators/current-subscription.decorator");
 const subscription_model_1 = require("../../subscription/models/subscription.model");
 const get_subscription_metadata_decorator_1 = require("../../common/decorators/get-subscription-metadata.decorator");
+const create_auth_dto_1 = require("../../auth/dto/create-auth.dto");
 let UserController = class UserController extends controller_core_1.CoreController {
     constructor(userService) {
         super();
@@ -39,6 +40,10 @@ let UserController = class UserController extends controller_core_1.CoreControll
     async profile(currentUser, currentSubscription, res) {
         console.log('currentSubscription >> ', currentSubscription);
         const user = await this.userService.profile(currentUser._id);
+        return this.responseSuccess(res, '00', 'Success', user, common_1.HttpStatus.ACCEPTED);
+    }
+    async resetPassword(reset, currentUser, res) {
+        const user = await this.userService.resetUserPassword(reset, currentUser._id);
         return this.responseSuccess(res, '00', 'Success', user, common_1.HttpStatus.ACCEPTED);
     }
 };
@@ -71,6 +76,16 @@ __decorate([
     __metadata("design:paramtypes", [Object, subscription_model_1.Subscription, Object]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "profile", null);
+__decorate([
+    (0, common_1.Post)("reset_password"),
+    (0, common_1.UseGuards)(auth_guards_1.AuthGuard),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, current_user_decorator_1.CurrentUser)()),
+    __param(2, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [create_auth_dto_1.ResetUserPasswordDto, Object, Object]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "resetPassword", null);
 UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

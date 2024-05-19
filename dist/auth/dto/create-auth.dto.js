@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ResetPasswordDto = exports.ForgotPasswordDto = void 0;
+exports.ResetUserPasswordDto = exports.ResetPasswordDto = exports.ForgotPasswordDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
 class ForgotPasswordDto {
@@ -30,4 +30,19 @@ __decorate([
     __metadata("design:type", String)
 ], ResetPasswordDto.prototype, "password", void 0);
 exports.ResetPasswordDto = ResetPasswordDto;
+class ResetUserPasswordDto {
+}
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResetUserPasswordDto.prototype, "currentPassword", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], ResetUserPasswordDto.prototype, "newPassword", void 0);
+exports.ResetUserPasswordDto = ResetUserPasswordDto;
 //# sourceMappingURL=create-auth.dto.js.map

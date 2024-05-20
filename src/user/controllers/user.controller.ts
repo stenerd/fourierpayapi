@@ -22,6 +22,7 @@ import { CurrentUser } from 'src/common/decorators/current-user.decorator';
 import { CurrentSubscription } from 'src/common/decorators/current-subscription.decorator';
 import { Subscription } from 'src/subscription/models/subscription.model';
 import { GetSubscriptionData } from 'src/common/decorators/get-subscription-metadata.decorator';
+import { ResetUserPasswordDto } from 'src/auth/dto/create-auth.dto';
 
 @Controller('user')
 export class UserController extends CoreController {
@@ -59,6 +60,19 @@ export class UserController extends CoreController {
   ) {
     console.log('currentSubscription >> ', currentSubscription);
     const user = await this.userService.profile(currentUser._id);
+    return this.responseSuccess(
+      res,
+      '00',
+      'Success',
+      user,
+      HttpStatus.ACCEPTED,
+    );
+  }
+   
+  @Post("reset_password")   
+  @UseGuards(AuthGuard)
+  async resetPassword(@Body() reset: ResetUserPasswordDto, @CurrentUser() currentUser: IJWTUser, @Res({ passthrough: true }) res: Response) {
+    const user = await this.userService.resetUserPassword(reset, currentUser._id)
     return this.responseSuccess(
       res,
       '00',

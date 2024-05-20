@@ -15,7 +15,7 @@ import { UserRepository } from './user.repository';
 import { MailerService } from '@nestjs-modules/mailer';
 import { EmailService } from 'src/email.service';
 import { GenerateRandomString } from 'src/utils/code-generator.util';
-import { ResetPasswordDto } from 'src/auth/dto/create-auth.dto';
+import { ResetPasswordDto, ResetUserPasswordDto } from 'src/auth/dto/create-auth.dto';
 import { SubscriptionService } from 'src/subscription/services/subscription.service';
 import { SubscriptionSettingService } from 'src/subscription/services/subscription-setting.service';
 import { SubscriptionTagEnum } from 'src/subscription/subscription.enum';
@@ -26,6 +26,7 @@ import { CheckDateDifference } from 'src/utils/date-formatter.util';
 import { signUpHTML } from 'src/email-html/signup';
 import { welcomeHTML } from 'src/email-html/welcome';
 import { addDays, format, parseISO, subDays } from 'date-fns';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService extends CoreService<UserRepository> {
@@ -128,6 +129,24 @@ export class UserService extends CoreService<UserRepository> {
     );
   }
 
+  async comparePassword(password: string, hash: string) {
+    return await bcrypt.compare(password, hash);
+  }
+
+
+
+  async resetUserPassword(reset: ResetUserPasswordDto, id) {
+    const user = await this.findOne({ _id: id })
+    if (!user) throw new BadRequestException("Invalid Request");
+    const passwordMatch = await this.comparePassword(
+      reset.currentPassword,
+      user.password,
+    );
+    if(!passwordMatch) throw new ConflictException("Incorrect Password")
+    user.password = reset.newPassword;
+    return await this.userRepository.save(user)
+  }
+
   async confirmEmail(token: string): Promise<any> {
     const get_user = await this.findOne({ token });
     if (!get_user) throw new BadRequestException('invalid request');
@@ -171,23 +190,23 @@ export class UserService extends CoreService<UserRepository> {
       ...searchQuery,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate),
-            $gte: new Date(query.startDate),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate),
+          $gte: new Date(query.startDate),
+        },
+      }),
     };
 
     const total = await this.userRepository
@@ -347,23 +366,23 @@ export class UserService extends CoreService<UserRepository> {
       isActive: true,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const searchInActiveQuery = {
@@ -371,46 +390,46 @@ export class UserService extends CoreService<UserRepository> {
       isActive: false,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const searchAllQuery = {
       ...searchQuery,
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const totalActive = await this.userRepository
@@ -450,16 +469,16 @@ export class UserService extends CoreService<UserRepository> {
         ...searchQuery,
         ...(query.startDate &&
           query.endDate && {
-            createdAt: {
-              $gte: new Date(
-                format(
-                  subDays(parseISO(query.startDate), getDifferenceInDays),
-                  'yyyy-MM-dd',
-                ),
-              ).toISOString(),
-              $lte: new Date(query.startDate).toISOString(),
-            },
-          }),
+          createdAt: {
+            $gte: new Date(
+              format(
+                subDays(parseISO(query.startDate), getDifferenceInDays),
+                'yyyy-MM-dd',
+              ),
+            ).toISOString(),
+            $lte: new Date(query.startDate).toISOString(),
+          },
+        }),
       };
 
       const lastSearchActiveQuery = {
@@ -517,23 +536,23 @@ export class UserService extends CoreService<UserRepository> {
     const searchAllQuery = {
       ...(query.startDate &&
         !query.endDate && {
-          createdAt: {
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
       ...(!query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+        },
+      }),
       ...(query.startDate &&
         query.endDate && {
-          createdAt: {
-            $lte: new Date(query.endDate).toISOString(),
-            $gte: new Date(query.startDate).toISOString(),
-          },
-        }),
+        createdAt: {
+          $lte: new Date(query.endDate).toISOString(),
+          $gte: new Date(query.startDate).toISOString(),
+        },
+      }),
     };
 
     const totalAll = await this.userRepository

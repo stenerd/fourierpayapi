@@ -4,3 +4,7 @@ export declare class ForgotPasswordDto {
 export declare class ResetPasswordDto {
     password: string;
 }
+export declare class ResetUserPasswordDto {
+    currentPassword: string;
+    newPassword: string;
+}

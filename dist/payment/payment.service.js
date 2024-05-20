@@ -306,21 +306,26 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
             .sort({ _id: -1 })
             .skip(((+page || 1) - 1) * (+perPage || 10))
             .limit(+perPage || 10);
-        let recievedAmount = 0;
-        let numberOfRecipient = 0;
-        for (let i = 0; i < payments.length; i++) {
-            const payment = payments[i];
-            if (payment.status === transaction_enum_1.TransactionStatus.PAID) {
-                recievedAmount += +payment.amount;
-                numberOfRecipient++;
-            }
-        }
+        const result = await this.paymentRepository.model().aggregate([
+            {
+                $match: Object.assign(Object.assign({}, searchQuery), { payment_link_id: paymentLink._id, status: transaction_enum_1.TransactionStatus.PAID }),
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalAmount: { $sum: '$amount' },
+                    totalCount: { $sum: 1 },
+                },
+            },
+        ]);
+        const { totalAmount: recievedAmount, totalCount: numberOfRecipient } = result.length > 0 ? result[0] : { totalAmount: 0, totalCount: 0 };
         return {
             data: {
                 payments,
                 paymentLink,
                 recievedAmount,
                 numberOfRecipient,
+                result,
             },
             meta: {
                 total,
@@ -413,6 +418,23 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                 },
             };
         }
+    }
+    async singlePaymentVerification(code, unique_answer) {
+        const paymentLink = await this.paymentLinkService.findOne({
+            code,
+        });
+        if (!paymentLink)
+            throw new common_1.BadRequestException('payment link does not exist');
+        const payment = await this.paymentRepository.findOne({
+            unique_answer: unique_answer,
+            payment_link_id: paymentLink._id,
+            status: transaction_enum_1.TransactionStatus.PAID,
+        }, {}, {
+            populate: ['transaction_id'],
+        });
+        if (!payment)
+            throw new common_1.BadRequestException('payment does not exist');
+        return payment;
     }
     async getPaymentReference(reference) {
         const transaction = await this.transactionService.findOne({

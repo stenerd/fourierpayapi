@@ -13,5 +13,6 @@ export declare class PaymentController extends CoreController {
     abandonPayment(dto: VerifyPaymentDto, res: Response): Promise<void>;
     getPaymentLink(currentUser: IJWTUser, res: Response, code: string, query: ViewPaymentDto): Promise<void>;
     getExternalPayment(res: Response, code: string, query: ViewPaymentDto): Promise<void>;
+    singlePaymentVerification(code: string, res: Response, unique_answer: string): Promise<void>;
     getPaymentReference(res: Response, reference: string): Promise<void>;
 }

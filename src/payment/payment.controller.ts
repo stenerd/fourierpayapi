@@ -89,6 +89,19 @@ export class PaymentController extends CoreController {
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
   }
 
+  @Get('/verify/:code/:unique_answer')
+  async singlePaymentVerification(
+    @Param('code') code: string,
+    @Res({ passthrough: true }) res: Response,
+    @Param('unique_answer') unique_answer: string,
+  ) {
+    const resp = await this.paymentService.singlePaymentVerification(
+      code,
+      unique_answer,
+    );
+    return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
+  }
+
   @Get('/reciept/:reference')
   async getPaymentReference(
     @Res({ passthrough: true }) res: Response,

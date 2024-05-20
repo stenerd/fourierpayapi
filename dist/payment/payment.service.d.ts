@@ -32,8 +32,9 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
                 _id: import("mongoose").Types.ObjectId;
             }, never>[];
             paymentLink: any;
-            recievedAmount: number;
-            numberOfRecipient: number;
+            recievedAmount: any;
+            numberOfRecipient: any;
+            result: any[];
         };
         meta: {
             total: number;
@@ -70,6 +71,7 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
             lastPage: number;
         };
     }>;
+    singlePaymentVerification(code: any, unique_answer: any): Promise<import("./payment.model").PaymentDocument>;
     getPaymentReference(reference: any): Promise<{
         transaction: any;
         payment_link: any;

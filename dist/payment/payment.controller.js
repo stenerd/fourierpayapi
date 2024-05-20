@@ -46,6 +46,10 @@ let PaymentController = class PaymentController extends controller_core_1.CoreCo
         const resp = await this.paymentService.getExternalPayment(code || '', query);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
     }
+    async singlePaymentVerification(code, res, unique_answer) {
+        const resp = await this.paymentService.singlePaymentVerification(code, unique_answer);
+        return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
+    }
     async getPaymentReference(res, reference) {
         const resp = await this.paymentService.getPaymentReference(reference || '');
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
@@ -95,6 +99,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, String, view_payment_dto_1.ViewPaymentDto]),
     __metadata("design:returntype", Promise)
 ], PaymentController.prototype, "getExternalPayment", null);
+__decorate([
+    (0, common_1.Get)('/verify/:code/:unique_answer'),
+    __param(0, (0, common_1.Param)('code')),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __param(2, (0, common_1.Param)('unique_answer')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object, String]),
+    __metadata("design:returntype", Promise)
+], PaymentController.prototype, "singlePaymentVerification", null);
 __decorate([
     (0, common_1.Get)('/reciept/:reference'),
     __param(0, (0, common_1.Res)({ passthrough: true })),

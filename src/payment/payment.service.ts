@@ -442,16 +442,36 @@ export class PaymentService extends CoreService<PaymentRepository> {
       .skip(((+page || 1) - 1) * (+perPage || 10))
       .limit(+perPage || 10);
 
-    let recievedAmount = 0;
-    let numberOfRecipient = 0;
+    // let recievedAmount = 0;
+    // let numberOfRecipient = 0;
 
-    for (let i = 0; i < payments.length; i++) {
-      const payment = payments[i];
-      if (payment.status === TransactionStatus.PAID) {
-        recievedAmount += +payment.amount;
-        numberOfRecipient++;
-      }
-    }
+    // for (let i = 0; i < payments.length; i++) {
+    //   const payment = payments[i];
+    //   if (payment.status === TransactionStatus.PAID) {
+    //     recievedAmount += +payment.amount;
+    //     numberOfRecipient++;
+    //   }
+    // }
+
+    const result = await this.paymentRepository.model().aggregate([
+      {
+        $match: {
+          ...searchQuery,
+          payment_link_id: paymentLink._id,
+          status: TransactionStatus.PAID,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalAmount: { $sum: '$amount' },
+          totalCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const { totalAmount: recievedAmount, totalCount: numberOfRecipient } =
+      result.length > 0 ? result[0] : { totalAmount: 0, totalCount: 0 };
 
     return {
       data: {
@@ -459,6 +479,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
         paymentLink,
         recievedAmount,
         numberOfRecipient,
+        result,
       },
       meta: {
         total,
@@ -584,6 +605,31 @@ export class PaymentService extends CoreService<PaymentRepository> {
     }
   }
 
+  async singlePaymentVerification(code, unique_answer) {
+    const paymentLink = await this.paymentLinkService.findOne({
+      code,
+    });
+
+    if (!paymentLink)
+      throw new BadRequestException('payment link does not exist');
+
+    const payment = await this.paymentRepository.findOne(
+      {
+        unique_answer: unique_answer,
+        payment_link_id: paymentLink._id,
+        status: TransactionStatus.PAID,
+      },
+      {},
+      {
+        populate: ['transaction_id'],
+      },
+    );
+
+    if (!payment) throw new BadRequestException('payment does not exist');
+
+    return payment;
+  }
+
   async getPaymentReference(reference) {
     const transaction = await this.transactionService.findOne(
       {
@@ -605,11 +651,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
       _id: transaction.payment_link_id,
     });
 
-    // const data_payment = await this.getPaymentByCode(payment_link.code, {});
-
     console.log('payment_link >> ', payment_link);
-
-    // console.log('data_payment >> ', data_payment);
 
     return { transaction, payment_link };
   }

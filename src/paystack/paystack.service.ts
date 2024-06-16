@@ -66,7 +66,6 @@ export class PaystackService {
       throw new BadRequestException(
         'Unable to verify paystack payment request',
       );
-
     return result.data;
   }
 

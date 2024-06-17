@@ -57,6 +57,18 @@ export class MetadataService implements IMetadata {
                 throw new ConflictException()
         }
     }
-
-
+    async editMetadata(name: string, data: Record<string, {}>) {
+        switch (name) {
+            case Roles.DEPARTMENT:
+                await this.departmentRepository.findOneAndUpdate({_id:data.id},{data},{})
+            case Roles.INSTITUTION:
+                await this.institutionRepository.findOneAndUpdate({_id:data.id},{data},{})
+            case Roles.FACULTY:
+                await this.facultyRepository.findOneAndUpdate({_id:data.id},{data},{})
+            case Roles.LEVEL:
+                await this.levelRepository.findOneAndUpdate({_id:data.id},{data},{})
+            default:
+                throw new ConflictException()
+        }
+    }
 }

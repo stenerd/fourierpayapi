@@ -12,4 +12,5 @@ export declare class MetadataService implements IMetadata {
     createMetadata(name: Roles, data: Record<string, {}>): Promise<void>;
     deleteMetadata(name: string, data: any): Promise<void>;
     findMetadata(name: string, data: Record<string, {}>): Promise<void>;
+    editMetadata(name: string, data: Record<string, {}>): Promise<void>;
 }

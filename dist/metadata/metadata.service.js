@@ -65,6 +65,20 @@ let MetadataService = class MetadataService {
                 throw new common_1.ConflictException();
         }
     }
+    async editMetadata(name, data) {
+        switch (name) {
+            case metadata_interface_1.Roles.DEPARTMENT:
+                await this.departmentRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
+            case metadata_interface_1.Roles.INSTITUTION:
+                await this.institutionRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
+            case metadata_interface_1.Roles.FACULTY:
+                await this.facultyRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
+            case metadata_interface_1.Roles.LEVEL:
+                await this.levelRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
+            default:
+                throw new common_1.ConflictException();
+        }
+    }
 };
 MetadataService = __decorate([
     (0, common_1.Injectable)(),

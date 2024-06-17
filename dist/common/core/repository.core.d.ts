@@ -8,6 +8,7 @@ export declare abstract class CoreRepository<T extends Document> {
     createMany(createEntityData: unknown): Promise<T>;
     findOneAndUpdate(entityFilterQuery: FilterQuery<T>, updateEntityData: UpdateQuery<unknown>, options: QueryOptions): Promise<T | null>;
     deleteMany(entityFilterQuery: FilterQuery<T>): Promise<boolean>;
+    delete(entityFilterQuery: FilterQuery<T>): Promise<import("mongodb").DeleteResult>;
     newDocument<D>(data: D): T;
     model(): Model<T>;
     save(entity: any, options?: QueryOptions): Promise<T>;

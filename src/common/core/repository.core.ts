@@ -8,7 +8,7 @@ import {
 } from 'mongoose';
 
 export abstract class CoreRepository<T extends Document> {
-  constructor(protected readonly entityModel: Model<T>) {}
+  constructor(protected readonly entityModel: Model<T>) { }
 
   async findOne(
     entityFilterQuery: FilterQuery<T>,
@@ -61,6 +61,11 @@ export abstract class CoreRepository<T extends Document> {
   async deleteMany(entityFilterQuery: FilterQuery<T>): Promise<boolean> {
     const deleteResult = await this.entityModel.deleteMany(entityFilterQuery);
     return deleteResult.deletedCount >= 1;
+  }
+
+  async delete(entityFilterQuery: FilterQuery<T>) {
+    const deleteOne = await this.entityModel.deleteOne(entityFilterQuery)
+    return deleteOne
   }
 
   newDocument<D>(data: D): T {

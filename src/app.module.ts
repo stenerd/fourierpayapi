@@ -27,6 +27,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SchoolModule } from './school/school.module';
+import { MetadataModule } from './metadata/metadata.module';
 const config = configuration();
 
 @Module({
@@ -96,6 +97,7 @@ const config = configuration();
     AdminModule,
     WebhookModule,
     SchoolModule,
+    MetadataModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

@@ -27,6 +27,10 @@ class CoreRepository {
         const deleteResult = await this.entityModel.deleteMany(entityFilterQuery);
         return deleteResult.deletedCount >= 1;
     }
+    async delete(entityFilterQuery) {
+        const deleteOne = await this.entityModel.deleteOne(entityFilterQuery);
+        return deleteOne;
+    }
     newDocument(data) {
         return new this.entityModel(data);
     }

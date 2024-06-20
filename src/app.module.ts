@@ -28,6 +28,8 @@ import { AdminModule } from './admin/admin.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SchoolModule } from './school/school.module';
 import { MetadataModule } from './metadata/metadata.module';
+import { DatabaseModule } from './database/database.module';
+import { SettingsModule } from './settings/settings.module';
 const config = configuration();
 
 @Module({
@@ -98,6 +100,8 @@ const config = configuration();
     WebhookModule,
     SchoolModule,
     MetadataModule,
+    DatabaseModule,
+    SettingsModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

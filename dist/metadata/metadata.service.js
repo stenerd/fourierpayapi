@@ -22,62 +22,28 @@ let MetadataService = class MetadataService {
         this.institutionRepository = institutionRepository;
         this.levelRepository = levelRepository;
         this.departmentRepository = departmentRepository;
+        this.repositoryMap = {
+            [metadata_interface_1.Roles.DEPARTMENT]: this.departmentRepository,
+            [metadata_interface_1.Roles.INSTITUTION]: this.institutionRepository,
+            [metadata_interface_1.Roles.FACULTY]: this.facultyRepository,
+            [metadata_interface_1.Roles.LEVEL]: this.levelRepository,
+        };
     }
     async createMetadata(name, data) {
-        switch (name) {
-            case metadata_interface_1.Roles.DEPARTMENT:
-                await this.departmentRepository.create(data);
-            case metadata_interface_1.Roles.INSTITUTION:
-                await this.institutionRepository.create(data);
-            case metadata_interface_1.Roles.FACULTY:
-                await this.facultyRepository.create(data);
-            case metadata_interface_1.Roles.LEVEL:
-                await this.levelRepository.create(data);
-            default:
-                throw new common_1.ConflictException();
-        }
+        let repository = this.repositoryMap[name];
+        await repository.create(data);
     }
     async deleteMetadata(name, data) {
-        switch (name) {
-            case metadata_interface_1.Roles.DEPARTMENT:
-                await this.departmentRepository.delete(data);
-            case metadata_interface_1.Roles.INSTITUTION:
-                await this.institutionRepository.delete(data);
-            case metadata_interface_1.Roles.FACULTY:
-                await this.facultyRepository.delete(data);
-            case metadata_interface_1.Roles.LEVEL:
-                await this.levelRepository.delete(data);
-            default:
-                throw new common_1.ConflictException();
-        }
+        let repository = this.repositoryMap[name];
+        await repository.delete(data);
     }
     async findMetadata(name, data) {
-        switch (name) {
-            case metadata_interface_1.Roles.DEPARTMENT:
-                await this.departmentRepository.find(data);
-            case metadata_interface_1.Roles.INSTITUTION:
-                await this.institutionRepository.find(data);
-            case metadata_interface_1.Roles.FACULTY:
-                await this.facultyRepository.find(data);
-            case metadata_interface_1.Roles.LEVEL:
-                await this.levelRepository.find(data);
-            default:
-                throw new common_1.ConflictException();
-        }
+        let repository = this.repositoryMap[name];
+        await repository.find(data);
     }
     async editMetadata(name, data) {
-        switch (name) {
-            case metadata_interface_1.Roles.DEPARTMENT:
-                await this.departmentRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
-            case metadata_interface_1.Roles.INSTITUTION:
-                await this.institutionRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
-            case metadata_interface_1.Roles.FACULTY:
-                await this.facultyRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
-            case metadata_interface_1.Roles.LEVEL:
-                await this.levelRepository.findOneAndUpdate({ _id: data.id }, { data }, {});
-            default:
-                throw new common_1.ConflictException();
-        }
+        let repository = this.repositoryMap[name];
+        await repository.findOneAndUpdate({ _id: data.id }, { data }, {});
     }
 };
 MetadataService = __decorate([

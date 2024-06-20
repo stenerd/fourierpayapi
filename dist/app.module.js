@@ -36,6 +36,8 @@ const admin_module_1 = require("./admin/admin.module");
 const webhook_module_1 = require("./webhook/webhook.module");
 const school_module_1 = require("./school/school.module");
 const metadata_module_1 = require("./metadata/metadata.module");
+const database_module_1 = require("./database/database.module");
+const settings_module_1 = require("./settings/settings.module");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
@@ -107,6 +109,8 @@ AppModule = __decorate([
             webhook_module_1.WebhookModule,
             school_module_1.SchoolModule,
             metadata_module_1.MetadataModule,
+            database_module_1.DatabaseModule,
+            settings_module_1.SettingsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

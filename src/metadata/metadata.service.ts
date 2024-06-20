@@ -13,62 +13,30 @@ export class MetadataService implements IMetadata {
         private readonly levelRepository: LevelMetadataRepository,
         private readonly departmentRepository: DepartmentMetadataRepository
     ) { }
-    async createMetadata(name: Roles, data: Record<string, {}>) {
-        switch (name) {
-            case Roles.DEPARTMENT:
-                await this.departmentRepository.create(data)
-            case Roles.INSTITUTION:
-                await this.institutionRepository.create(data)
-            case Roles.FACULTY:
-                await this.facultyRepository.create(data)
-            case Roles.LEVEL:
-                await this.levelRepository.create(data)
-            default:
-                throw new ConflictException()
-        }
+
+    repositoryMap = {
+        [Roles.DEPARTMENT]: this.departmentRepository,
+        [Roles.INSTITUTION]: this.institutionRepository,
+        [Roles.FACULTY]: this.facultyRepository,
+        [Roles.LEVEL]: this.levelRepository,
+    };
+
+    async createMetadata(name: Roles, data: Record<string, any>) {
+        let repository = this.repositoryMap[name]
+        await repository.create(data)
     }
 
     async deleteMetadata(name: string, data) {
-        switch (name) {
-            case Roles.DEPARTMENT:
-                await this.departmentRepository.delete(data)
-            case Roles.INSTITUTION:
-                await this.institutionRepository.delete(data)
-            case Roles.FACULTY:
-                await this.facultyRepository.delete(data)
-            case Roles.LEVEL:
-                await this.levelRepository.delete(data)
-            default:
-                throw new ConflictException()
-        }
+        let repository = this.repositoryMap[name]
+        await repository.delete(data)
     }
 
-    async findMetadata(name: string, data: Record<string, {}>) {
-        switch (name) {
-            case Roles.DEPARTMENT:
-                await this.departmentRepository.find(data)
-            case Roles.INSTITUTION:
-                await this.institutionRepository.find(data)
-            case Roles.FACULTY:
-                await this.facultyRepository.find(data)
-            case Roles.LEVEL:
-                await this.levelRepository.find(data)
-            default:
-                throw new ConflictException()
-        }
+    async findMetadata(name: string, data: Record<string, any>) {
+        let repository = this.repositoryMap[name]
+        await repository.find(data)
     }
-    async editMetadata(name: string, data: Record<string, {}>) {
-        switch (name) {
-            case Roles.DEPARTMENT:
-                await this.departmentRepository.findOneAndUpdate({_id:data.id},{data},{})
-            case Roles.INSTITUTION:
-                await this.institutionRepository.findOneAndUpdate({_id:data.id},{data},{})
-            case Roles.FACULTY:
-                await this.facultyRepository.findOneAndUpdate({_id:data.id},{data},{})
-            case Roles.LEVEL:
-                await this.levelRepository.findOneAndUpdate({_id:data.id},{data},{})
-            default:
-                throw new ConflictException()
-        }
+    async editMetadata(name: string, data: Record<string, any>) {
+        let repository = this.repositoryMap[name]
+        await repository.findOneAndUpdate({ _id: data.id }, { data }, {})
     }
 }

@@ -9,9 +9,10 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.InstitutionMetadataSchema = exports.LevelMetadataSchema = exports.DepartmentMetadataSchema = exports.FacultyMetadataSchema = exports.InstitionMetadata = exports.LevelMetadata = exports.DepartmentMetadata = exports.FacultyMetadata = void 0;
+exports.FacultySchema = exports.LevelSchema = exports.DepartmentSchema = exports.InstitutionSchema = exports.InstitutionMetadataSchema = exports.LevelMetadataSchema = exports.DepartmentMetadataSchema = exports.FacultyMetadataSchema = exports.Level = exports.Department = exports.Institution = exports.Faculty = exports.InstitionMetadata = exports.LevelMetadata = exports.DepartmentMetadata = exports.FacultyMetadata = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const basemetadata_model_1 = require("./basemetadata.model");
+const mongoose_2 = require("mongoose");
 let FacultyMetadata = class FacultyMetadata extends basemetadata_model_1.BaseMetaData {
 };
 __decorate([
@@ -52,8 +53,60 @@ InstitionMetadata = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], InstitionMetadata);
 exports.InstitionMetadata = InstitionMetadata;
+let Faculty = class Faculty extends mongoose_2.Document {
+};
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Faculty.prototype, "institution_id", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: FacultyMetadata.name }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Faculty.prototype, "faculty_id", void 0);
+Faculty = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Faculty);
+exports.Faculty = Faculty;
+let Institution = class Institution extends mongoose_2.Document {
+};
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: InstitionMetadata.name }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Institution.prototype, "institution_id", void 0);
+Institution = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Institution);
+exports.Institution = Institution;
+let Department = class Department extends mongoose_2.Document {
+};
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: Institution.name }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Department.prototype, "institution_id", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: Faculty.name }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Department.prototype, "faculty_id", void 0);
+Department = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Department);
+exports.Department = Department;
+let Level = class Level extends mongoose_2.Document {
+};
+__decorate([
+    (0, mongoose_1.Prop)({ type: mongoose_2.SchemaTypes.ObjectId, ref: LevelMetadata.name }),
+    __metadata("design:type", mongoose_2.Types.ObjectId)
+], Level.prototype, "level_id", void 0);
+Level = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Level);
+exports.Level = Level;
 exports.FacultyMetadataSchema = mongoose_1.SchemaFactory.createForClass(FacultyMetadata);
 exports.DepartmentMetadataSchema = mongoose_1.SchemaFactory.createForClass(FacultyMetadata);
 exports.LevelMetadataSchema = mongoose_1.SchemaFactory.createForClass(FacultyMetadata);
 exports.InstitutionMetadataSchema = mongoose_1.SchemaFactory.createForClass(FacultyMetadata);
+exports.InstitutionSchema = mongoose_1.SchemaFactory.createForClass(Institution);
+exports.DepartmentSchema = mongoose_1.SchemaFactory.createForClass(Department);
+exports.LevelSchema = mongoose_1.SchemaFactory.createForClass(Level);
+exports.FacultySchema = mongoose_1.SchemaFactory.createForClass(Faculty);
 //# sourceMappingURL=metadata.model.js.map

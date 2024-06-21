@@ -38,6 +38,7 @@ const school_module_1 = require("./school/school.module");
 const metadata_module_1 = require("./metadata/metadata.module");
 const database_module_1 = require("./database/database.module");
 const settings_module_1 = require("./settings/settings.module");
+const lecturer_module_1 = require("./lecturer/lecturer.module");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
@@ -111,6 +112,7 @@ AppModule = __decorate([
             metadata_module_1.MetadataModule,
             database_module_1.DatabaseModule,
             settings_module_1.SettingsModule,
+            lecturer_module_1.LecturerModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

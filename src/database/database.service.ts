@@ -32,7 +32,6 @@ export class DatabaseService implements OnModuleInit {
         const faculty = ["ENGINEERING", "PHYSICAL SCIENCE", "LAW"];
         const department = ["MECHANICAL ENGINEERING"];
         const institution = await this.institutionMetadata.findOne({ name: university[0] });
-        console.log(institution)
         if (!institution) {
             const createInstitution = await this.metadata.createMetadata(Roles.INSTITUTION, { name: university[0], slug: university[0] });
             console.log(createInstitution);
@@ -61,7 +60,6 @@ export class DatabaseService implements OnModuleInit {
             }
             console.log("seed completed")
         }
-        
         return
     }
 }

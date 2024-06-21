@@ -33,7 +33,8 @@ export class MetadataService implements IMetadata {
 
     async findMetadata(name: string, data: Record<string, any>) {
         let repository = this.repositoryMap[name]
-        await repository.find(data)
+        const found =  await repository.findOne(data)
+        return found
     }
     async editMetadata(name: string, data: Record<string, any>) {
         let repository = this.repositoryMap[name]

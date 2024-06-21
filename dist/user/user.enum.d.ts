@@ -5,7 +5,12 @@ export declare enum RoleEnum {
     SCHOOL = "School",
     UNIVERSITY = "University",
     SMEs = "SMEs",
-    OTHERS = "Others"
+    OTHERS = "Others",
+    LEVEL = "level",
+    FACULTY = "faculty",
+    INSTITUTION = "institution",
+    DEPARTMENT = "department",
+    LECTURER = "lecturer"
 }
 export declare enum UserStatusEnum {
     ACTIVE = "active",

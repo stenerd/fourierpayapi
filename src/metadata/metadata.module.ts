@@ -28,4 +28,4 @@ import { FacultyRepository } from './repositories/faculty.repository';
   providers: [MetadataService, InstitutionMetadataRepository, FacultyMetadataRepository, LevelMetadataRepository, DepartmentMetadataRepository,DepartmentRepository,InstitutionRepository,LevelsRepository,FacultyRepository],
   exports: [InstitutionMetadataRepository, FacultyMetadataRepository, LevelMetadataRepository, DepartmentMetadataRepository,MetadataService,DepartmentMetadataRepository,DepartmentRepository,InstitutionRepository,LevelsRepository,FacultyRepository]
 })
-export class MetadataModule { }
+export class MetadataModule {}

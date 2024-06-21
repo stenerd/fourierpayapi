@@ -6,6 +6,11 @@ export enum RoleEnum {
   UNIVERSITY = 'University',
   SMEs = 'SMEs',
   OTHERS = 'Others',
+  LEVEL = "level",
+  FACULTY = "faculty",
+  INSTITUTION = "institution",
+  DEPARTMENT="department",
+  LECTURER="lecturer"
 }
 
 export enum UserStatusEnum {

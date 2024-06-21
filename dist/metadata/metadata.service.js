@@ -39,7 +39,8 @@ let MetadataService = class MetadataService {
     }
     async findMetadata(name, data) {
         let repository = this.repositoryMap[name];
-        await repository.find(data);
+        const found = await repository.findOne(data);
+        return found;
     }
     async editMetadata(name, data) {
         let repository = this.repositoryMap[name];

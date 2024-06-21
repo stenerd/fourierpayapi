@@ -30,6 +30,7 @@ import { SchoolModule } from './school/school.module';
 import { MetadataModule } from './metadata/metadata.module';
 import { DatabaseModule } from './database/database.module';
 import { SettingsModule } from './settings/settings.module';
+import { LecturerModule } from './lecturer/lecturer.module';
 const config = configuration();
 
 @Module({
@@ -102,6 +103,7 @@ const config = configuration();
     MetadataModule,
     DatabaseModule,
     SettingsModule,
+    LecturerModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

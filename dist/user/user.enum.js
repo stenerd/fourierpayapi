@@ -10,6 +10,11 @@ var RoleEnum;
     RoleEnum["UNIVERSITY"] = "University";
     RoleEnum["SMEs"] = "SMEs";
     RoleEnum["OTHERS"] = "Others";
+    RoleEnum["LEVEL"] = "level";
+    RoleEnum["FACULTY"] = "faculty";
+    RoleEnum["INSTITUTION"] = "institution";
+    RoleEnum["DEPARTMENT"] = "department";
+    RoleEnum["LECTURER"] = "lecturer";
 })(RoleEnum = exports.RoleEnum || (exports.RoleEnum = {}));
 var UserStatusEnum;
 (function (UserStatusEnum) {

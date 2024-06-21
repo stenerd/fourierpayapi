@@ -20,5 +20,6 @@ export declare class DatabaseService implements OnModuleInit {
     private readonly departmentRepo;
     constructor(facultyMetadata: FacultyMetadataRepository, levelMetadata: LevelMetadataRepository, departmentMetadata: DepartmentMetadataRepository, institutionMetadata: InstitutionMetadataRepository, metadata: MetadataService, facultyRepository: FacultyRepository, institutionRepo: InstitutionRepository, levelRepo: LevelsRepository, departmentRepo: DepartmentRepository);
     onModuleInit(): void;
+    slug(input: string): string;
     seedDb(): Promise<void>;
 }

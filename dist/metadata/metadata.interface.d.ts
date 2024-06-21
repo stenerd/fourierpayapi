@@ -5,7 +5,7 @@ export declare enum Roles {
     DEPARTMENT = "department"
 }
 export interface IMetadata {
-    createMetadata(name: Roles, data: Record<string, {}>): any;
-    deleteMetadata(name: string, data: Record<string, {}>): any;
-    findMetadata(name: string, data: Record<string, {}>): any;
+    createMetadata(name: Roles, data: Record<string, any>): any;
+    deleteMetadata(name: string, data: Record<string, any>): any;
+    findMetadata(name: string, data: Record<string, any>): any;
 }

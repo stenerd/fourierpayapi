@@ -30,19 +30,19 @@ let MetadataService = class MetadataService {
         };
     }
     async createMetadata(name, data) {
-        let repository = this.repositoryMap[name];
+        const repository = this.repositoryMap[name];
         await repository.create(data);
     }
     async deleteMetadata(name, data) {
-        let repository = this.repositoryMap[name];
+        const repository = this.repositoryMap[name];
         await repository.delete(data);
     }
     async findMetadata(name, data) {
-        let repository = this.repositoryMap[name];
+        const repository = this.repositoryMap[name];
         await repository.find(data);
     }
     async editMetadata(name, data) {
-        let repository = this.repositoryMap[name];
+        const repository = this.repositoryMap[name];
         await repository.findOneAndUpdate({ _id: data.id }, { data }, {});
     }
 };

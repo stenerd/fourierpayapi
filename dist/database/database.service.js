@@ -36,39 +36,56 @@ let DatabaseService = class DatabaseService {
     onModuleInit() {
         this.seedDb();
     }
+    slug(input) {
+        return input.replace(/ /g, '-');
+    }
     async seedDb() {
-        const university = ["Universiy of Benin"];
-        const faculty = ["ENGINEERING", "PHYSICAL SCIENCE", "LAW"];
-        const department = ["MECHANICAL ENGINEERING"];
-        const institution = await this.institutionMetadata.findOne({ name: university[0] });
+        const university = ['Universiy of Benin'];
+        const faculty = ['ENGINEERING', 'PHYSICAL SCIENCE', 'LAW'];
+        const department = ['MECHANICAL ENGINEERING'];
+        const institution = await this.institutionMetadata.findOne({
+            name: university[0],
+        });
         console.log(institution);
         if (!institution) {
-            const createInstitution = await this.metadata.createMetadata(metadata_interface_1.Roles.INSTITUTION, { name: university[0], slug: university[0] });
+            const createInstitution = await this.metadata.createMetadata(metadata_interface_1.Roles.INSTITUTION, { name: university[0], slug: this.slug(university[0]) });
             console.log(createInstitution);
-            const findInstitution = await this.institutionMetadata.findOne({ name: university[0] });
-            await this.institutionRepo.create({
-                institution_id: findInstitution._id
+            const findInstitution = await this.institutionMetadata.findOne({
+                name: university[0],
             });
-            const institute = await this.institutionRepo.findOne({ name: university[0] });
-            const findFaculty = await this.facultyMetadata.findOne({ name: faculty[0] });
+            await this.institutionRepo.create({
+                institution_id: findInstitution._id,
+            });
+            const institute = await this.institutionRepo.findOne({
+                name: university[0],
+            });
+            const findFaculty = await this.facultyMetadata.findOne({
+                name: faculty[0],
+            });
             if (!findFaculty) {
-                const newFacultyMetadata = await this.metadata.createMetadata(metadata_interface_1.Roles.FACULTY, { name: faculty[0], slug: faculty[0] });
-                const findFaculty = await this.facultyMetadata.findOne({ name: faculty[0] });
+                const newFacultyMetadata = await this.metadata.createMetadata(metadata_interface_1.Roles.FACULTY, { name: faculty[0], slug: this.slug(faculty[0]) });
+                const findFaculty = await this.facultyMetadata.findOne({
+                    name: faculty[0],
+                });
                 const createFaculty = await this.facultyRepository.create({
                     institution_id: institute._id,
-                    faculty_id: findFaculty._id
+                    faculty_id: findFaculty._id,
                 });
-                const departmentMeta = await this.departmentMetadata.findOne({ name: department[0] });
+                const departmentMeta = await this.departmentMetadata.findOne({
+                    name: department[0],
+                });
                 if (!departmentMeta) {
-                    const newDepartment = await this.metadata.createMetadata(metadata_interface_1.Roles.DEPARTMENT, { name: department[0], slug: department[0] });
-                    const departmentMeta = await this.departmentMetadata.findOne({ name: department[0] });
+                    const newDepartment = await this.metadata.createMetadata(metadata_interface_1.Roles.DEPARTMENT, { name: department[0], slug: this.slug(department[0]) });
+                    const departmentMeta = await this.departmentMetadata.findOne({
+                        name: department[0],
+                    });
                     const newDepart = await this.departmentRepo.create({
                         institution_id: institute._id,
-                        department_id: departmentMeta._id
+                        department_id: departmentMeta._id,
                     });
                 }
             }
-            console.log("seed completed");
+            console.log('seed completed');
         }
         return;
     }

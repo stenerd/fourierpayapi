@@ -22,9 +22,13 @@ export class DatabaseService implements OnModuleInit {
     private readonly institutionRepo: InstitutionRepository,
     private readonly levelRepo: LevelsRepository,
     private readonly departmentRepo: DepartmentRepository,
-  ) {}
+  ) { }
   onModuleInit() {
     this.seedDb();
+  }
+
+  slug(input: string) {
+    return input.replace(/ /g, '-');
   }
 
   async seedDb() {
@@ -38,7 +42,7 @@ export class DatabaseService implements OnModuleInit {
     if (!institution) {
       const createInstitution = await this.metadata.createMetadata(
         Roles.INSTITUTION,
-        { name: university[0], slug: university[0] },
+        { name: university[0], slug: this.slug(university[0]) },
       );
       console.log(createInstitution);
       const findInstitution = await this.institutionMetadata.findOne({
@@ -56,7 +60,7 @@ export class DatabaseService implements OnModuleInit {
       if (!findFaculty) {
         const newFacultyMetadata = await this.metadata.createMetadata(
           Roles.FACULTY,
-          { name: faculty[0], slug: faculty[0] },
+          { name: faculty[0], slug: this.slug(faculty[0]) },
         );
         const findFaculty = await this.facultyMetadata.findOne({
           name: faculty[0],
@@ -71,7 +75,7 @@ export class DatabaseService implements OnModuleInit {
         if (!departmentMeta) {
           const newDepartment = await this.metadata.createMetadata(
             Roles.DEPARTMENT,
-            { name: department[0], slug: department[0] },
+            { name: department[0], slug: this.slug(department[0]) },
           );
           const departmentMeta = await this.departmentMetadata.findOne({
             name: department[0],

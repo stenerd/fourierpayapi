@@ -24,6 +24,9 @@ let LecturerService = class LecturerService extends service_core_1.CoreService {
         this.userService = userService;
         this.metadata = metadata;
     }
+    slug(input) {
+        return input.replace(/ /g, '-');
+    }
     async createLecturer(body) {
         const data = await this.userService.create({
             email: body.email,
@@ -46,7 +49,7 @@ let LecturerService = class LecturerService extends service_core_1.CoreService {
                     metadataIds[entry.role] = metadata._id;
                 }
                 if (!metadata) {
-                    await this.metadata.createMetadata(entry.role, { name: entry.name, slug: entry.name });
+                    await this.metadata.createMetadata(entry.role, { name: entry.name, slug: this.slug(entry.name) });
                     const metadata = await this.metadata.findMetadata(entry.role, { name: entry.name });
                     metadataIds[entry.role] = await metadata._id;
                 }

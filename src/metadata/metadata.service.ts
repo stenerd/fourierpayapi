@@ -7,29 +7,29 @@ import { DepartmentMetadataRepository } from './repositories/department.reposito
 
 @Injectable()
 export class MetadataService implements IMetadata {
-    constructor(
-        private readonly facultyRepository: FacultyMetadataRepository,
-        private readonly institutionRepository: InstitutionMetadataRepository,
-        private readonly levelRepository: LevelMetadataRepository,
-        private readonly departmentRepository: DepartmentMetadataRepository
-    ) { }
+  constructor(
+    private readonly facultyRepository: FacultyMetadataRepository,
+    private readonly institutionRepository: InstitutionMetadataRepository,
+    private readonly levelRepository: LevelMetadataRepository,
+    private readonly departmentRepository: DepartmentMetadataRepository,
+  ) {}
 
-    repositoryMap = {
-        [Roles.DEPARTMENT]: this.departmentRepository,
-        [Roles.INSTITUTION]: this.institutionRepository,
-        [Roles.FACULTY]: this.facultyRepository,
-        [Roles.LEVEL]: this.levelRepository,
-    };
+  repositoryMap = {
+    [Roles.DEPARTMENT]: this.departmentRepository,
+    [Roles.INSTITUTION]: this.institutionRepository,
+    [Roles.FACULTY]: this.facultyRepository,
+    [Roles.LEVEL]: this.levelRepository,
+  };
 
-    async createMetadata(name: Roles, data: Record<string, any>) {
-        let repository = this.repositoryMap[name]
-        await repository.create(data)
-    }
+  async createMetadata(name: Roles, data: Record<string, any>) {
+    const repository = this.repositoryMap[name];
+    await repository.create(data);
+  }
 
-    async deleteMetadata(name: string, data) {
-        let repository = this.repositoryMap[name]
-        await repository.delete(data)
-    }
+  async deleteMetadata(name: string, data) {
+    const repository = this.repositoryMap[name];
+    await repository.delete(data);
+  }
 
     async findMetadata(name: string, data: Record<string, any>) {
         let repository = this.repositoryMap[name]

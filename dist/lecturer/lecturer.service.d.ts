@@ -8,5 +8,6 @@ export declare class LecturerService extends CoreService<LecturerRepository> {
     private readonly userService;
     private readonly metadata;
     constructor(lecturerRepository: LecturerRepository, userService: UserService, metadata: MetadataService);
+    slug(input: string): string;
     createLecturer(body: CreateLecturerDto): Promise<import("./model/lecturer.model").LecturerDocument>;
 }

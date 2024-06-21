@@ -12,6 +12,10 @@ export class LecturerService extends CoreService<LecturerRepository> {
     constructor(private readonly lecturerRepository: LecturerRepository, private readonly userService: UserService, private readonly metadata: MetadataService) {
         super(lecturerRepository)
     }
+    slug(input: string) {
+        return input.replace(/ /g, '-');
+    }
+
     async createLecturer(body: CreateLecturerDto) {
         const data = await this.userService.create({
             email: body.email,
@@ -36,7 +40,7 @@ export class LecturerService extends CoreService<LecturerRepository> {
                     metadataIds[entry.role] = metadata._id;
                 }
                 if (!metadata) {
-                    await this.metadata.createMetadata(entry.role, { name: entry.name, slug: entry.name });
+                    await this.metadata.createMetadata(entry.role, { name: entry.name, slug: this.slug(entry.name) });
                     const metadata: any = await this.metadata.findMetadata(entry.role, { name: entry.name });
                     metadataIds[entry.role] = await metadata._id;
                 }

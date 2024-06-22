@@ -13,7 +13,7 @@ export class LecturerService extends CoreService<LecturerRepository> {
         super(lecturerRepository)
     }
     slug(input: string) {
-        return input.replace(/ /g, '-');
+        return input.replace(/\s+/g, '-').toLowerCase();
     }
 
     async createLecturer(body: CreateLecturerDto) {

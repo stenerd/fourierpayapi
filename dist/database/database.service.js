@@ -37,7 +37,7 @@ let DatabaseService = class DatabaseService {
         this.seedDb();
     }
     slug(input) {
-        return input.replace(/ /g, '-');
+        return input.replace(/\s+/g, '-').toLowerCase();
     }
     async seedDb() {
         const university = ['Universiy of Benin'];

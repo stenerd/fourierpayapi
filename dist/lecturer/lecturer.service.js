@@ -25,7 +25,7 @@ let LecturerService = class LecturerService extends service_core_1.CoreService {
         this.metadata = metadata;
     }
     slug(input) {
-        return input.replace(/ /g, '-');
+        return input.replace(/\s+/g, '-').toLowerCase();
     }
     async createLecturer(body) {
         const data = await this.userService.create({

@@ -28,7 +28,7 @@ export class DatabaseService implements OnModuleInit {
   }
 
   slug(input: string) {
-    return input.replace(/ /g, '-');
+    return input.replace(/\s+/g, '-').toLowerCase();
   }
 
   async seedDb() {

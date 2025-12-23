@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CoreService } from 'src/common/core/service.core';
 import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
@@ -10,6 +14,11 @@ import { EmailService } from 'src/email.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { SubscriptionService } from 'src/subscription/services/subscription.service';
 import { RoleEnum } from 'src/user/user.enum';
+import {
+  AffiliateRegisterDto,
+  AffiliateLoginDto,
+} from './dto/affiliate-auth.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -20,37 +29,38 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  /**
-   * Compares input password against saved hash password
-   * @param password Com
-   * @param hash
-   * @returns
-   */
   async comparePassword(password: string, hash: string) {
     return await bcrypt.compare(password, hash);
   }
 
-  /**
-   * Hash refresh token and save to db
-   * @param userId
-   * @param rToken
-   */
   async updateUserDetails(userId: string, rToken: string): Promise<any> {
     const refresh_token = await bcrypt.hash(rToken, 12);
     await this.userService.updateOne(userId, { refresh_token });
   }
 
-  /**
-   * Generates tokens
-   * @param userObj
-   */
-  async createTokens(userObj: IJWTUser) {
+  // Updated to accept partial payload
+  async createTokens(userObj: {
+    _id: string;
+    email?: string;
+    role: RoleEnum;
+    firstname?: string;
+    lastname?: string;
+  }) {
     const [accessToken, refreshToken] = await Promise.all([
-      this.jwtService.signAsync(userObj, { expiresIn: 60 * 60 * 7 }),
       this.jwtService.signAsync(
         {
-          userId: userObj._id.toString(),
-          email: userObj.email,
+          _id: userObj._id,
+          email: userObj.email || null,
+          role: userObj.role,
+          firstname: userObj.firstname,
+          lastname: userObj.lastname,
+        },
+        { expiresIn: 60 * 60 * 7 },
+      ),
+      this.jwtService.signAsync(
+        {
+          userId: userObj._id,
+          email: userObj.email || null,
           role: userObj.role,
         },
         { expiresIn: 60 * 60 * 24 * 7 },
@@ -76,9 +86,6 @@ export class AuthService {
     if (!passwordMatch) {
       throw new NotFoundException('Invalid email/password provided.');
     }
-
-    // if (!get_user.isActive)
-    //   throw new NotFoundException('Verify your email before you login.');
 
     const customerData = {
       firstname: get_user.firstname,
@@ -113,5 +120,105 @@ export class AuthService {
     );
 
     return resp;
+  }
+
+  // =============================================
+  // AFFILIATE REGISTRATION
+  // =============================================
+  async affiliateRegister(dto: AffiliateRegisterDto) {
+    // Check uniqueness
+    const existingPhone = await this.userService.findOne({
+      phonenumber: dto.phonenumber,
+    });
+    if (existingPhone)
+      throw new BadRequestException('Phone number already registered');
+
+    const existingEmail = await this.userService.findOne({
+      email: dto.email.toLowerCase(),
+    });
+    if (existingEmail)
+      throw new BadRequestException('Email already registered');
+
+    const hashedPassword = await bcrypt.hash(dto.password, 12);
+
+    let affiliateCode: string;
+    do {
+      affiliateCode = randomBytes(4).toString('hex').toUpperCase();
+    } while (await this.userService.findOne({ affiliateCode }));
+
+    const user = await this.userService.create({
+      firstname: dto.name.trim(),
+      lastname: '',
+      phonenumber: dto.phonenumber,
+      email: dto.email.toLowerCase(),
+      password: hashedPassword,
+      role: RoleEnum.AFFILIATE,
+      affiliateCode,
+      affiliateEarnings: 0,
+      isActive: true,
+    } as any);
+
+    const payload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const { accessToken } = await this.createTokens(payload);
+
+    return {
+      message: 'Affiliate registration successful',
+      token: accessToken,
+      user: {
+        id: user._id,
+        name: user.firstname,
+        email: user.email,
+        phonenumber: user.phonenumber,
+        role: user.role,
+        affiliateCode: user.affiliateCode,
+      },
+    };
+  }
+
+  // =============================================
+  // AFFILIATE LOGIN (EMAIL + PASSWORD)
+  // =============================================
+  async affiliateLogin(dto: AffiliateLoginDto) {
+    const user = await this.userService.findOne({
+      email: dto.email.toLowerCase(),
+    });
+
+    if (!user || user.role !== RoleEnum.AFFILIATE) {
+      throw new NotFoundException('Invalid credentials');
+    }
+
+    const passwordMatch = await this.comparePassword(
+      dto.password,
+      user.password,
+    );
+    if (!passwordMatch) {
+      throw new NotFoundException('Invalid credentials');
+    }
+
+    const payload = {
+      _id: user._id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const { accessToken } = await this.createTokens(payload);
+
+    return {
+      message: 'Login successful',
+      token: accessToken,
+      user: {
+        id: user._id,
+        name: user.firstname,
+        email: user.email,
+        phonenumber: user.phonenumber,
+        role: user.role,
+        affiliateCode: user.affiliateCode,
+      },
+    };
   }
 }

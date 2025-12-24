@@ -1,42 +1,18 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { PaymentLinkService } from './payment-link.service';
-import { PaymentLinkController } from './payment-link.controller';
-import { PaymentLinkSchema } from './models/payment-link.model';
+import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { PaymentLinkRepository } from './repositories/payment-link.repository';
-import { PaymentLinkFactory } from './payment-link.factory';
-import { UserModule } from 'src/user/user.module';
-import { LinkModule } from 'src/link/link.module';
-import { ExcelService } from 'src/file-processor/excel-processor.service';
-import { PayerSheetSchema } from './models/payer-sheet.model';
-import { PayerSheetRepository } from './repositories/payer_sheet.repository';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
-import { QRCodeModule } from 'src/qrcode/qrcode.module';
+import { PaymentLinkAffiliateController } from './payment-link-affiliate.controller';
+import { PaymentLinkAffiliateService } from './payment-link-affiliate.service';
+import { PaymentAffiliateRepository } from './repositories/payment-link-affiliate.repository';
+import { PaymentAffiliateSchema } from './models/payment-link-affiliate.model';
 
 @Module({
   imports: [
-    forwardRef(() => UserModule),
-    LinkModule,
-    QRCodeModule,
     MongooseModule.forFeature([
-      { name: 'PaymentLink', schema: PaymentLinkSchema },
-      { name: 'PayerSheet', schema: PayerSheetSchema },
+      { name: 'PaymentAffiliate', schema: PaymentAffiliateSchema },
     ]),
   ],
-  controllers: [PaymentLinkController],
-  providers: [
-    PaymentLinkService,
-    PaymentLinkRepository,
-    PayerSheetRepository,
-    PaymentLinkFactory,
-    ExcelService,
-    CloudinaryService,
-  ],
-  exports: [
-    PaymentLinkService,
-    PaymentLinkRepository,
-    PaymentLinkFactory,
-    PayerSheetRepository,
-  ],
+  controllers: [PaymentLinkAffiliateController],
+  providers: [PaymentLinkAffiliateService, PaymentAffiliateRepository],
+  exports: [PaymentLinkAffiliateService, PaymentAffiliateRepository],
 })
-export class PaymentLinkModule {}
+export class PaymentLinkAffiliateModule {}

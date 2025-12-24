@@ -1,4 +1,3 @@
-// Third party libraries
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, SchemaTypes, Types } from 'mongoose';
 import {
@@ -9,8 +8,7 @@ import {
 
 export type PaymentLinkDocument = PaymentLink & Document;
 
-// Schema configuration
-
+// Embedded Form Schema
 @Schema()
 export class Form extends Document {
   @Prop({ required: true })
@@ -27,6 +25,7 @@ export class Form extends Document {
 }
 export const FormSchema = SchemaFactory.createForClass(Form);
 
+// Embedded SheetUrl
 @Schema({ timestamps: true })
 export class SheetUrl {
   @Prop({ required: false })
@@ -108,11 +107,20 @@ export class PaymentLink {
   @Prop({ default: false })
   activate_public_link: boolean;
 
-  @Prop({ type: Types.Array })
+  @Prop({ type: [SheetUrl], default: [] })
   sheetUrl: SheetUrl[];
 
   @Prop({ type: [FormSchema], default: [] })
   form?: Form[];
+
+  @Prop({ default: false })
+  affiliateEnabled: boolean;
+
+  @Prop({ type: Number, default: null })
+  tier1FixedAmount?: number;
+
+  @Prop({ type: Number, default: null })
+  tier2FixedAmount?: number;
 }
 
 export const PaymentLinkSchema = SchemaFactory.createForClass(PaymentLink);

@@ -97,6 +97,7 @@ const config = configuration();
     AdminModule,
     WebhookModule,
     SchoolModule,
+    PaymentLinkAffiliateModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

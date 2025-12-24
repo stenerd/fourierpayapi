@@ -4,6 +4,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { PaymentLinkModule } from './payment-link/payment-link.module';
+import { PaymentLinkAffiliateModule } from './payment-link-affiliate/payment-link-affiliate.module';
 import { TransactionModule } from './transaction/transaction.module';
 import { PaymentModule } from './payment/payment.module';
 import { PaystackModule } from './paystack/paystack.module';

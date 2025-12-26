@@ -214,18 +214,24 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
       );
     }
 
-    // Update affiliate fields
-    paymentLink.affiliateEnabled = dto.affiliateEnabled;
+    // Prepare update object with only changed fields
+    const updateData: any = {
+      affiliateEnabled: dto.affiliateEnabled,
+    };
+
     if (dto.tier1FixedAmount !== undefined) {
-      paymentLink.tier1FixedAmount = dto.tier1FixedAmount;
+      updateData.tier1FixedAmount = dto.tier1FixedAmount;
     }
+
     if (dto.tier2FixedAmount !== undefined) {
-      paymentLink.tier2FixedAmount = dto.tier2FixedAmount;
+      updateData.tier2FixedAmount = dto.tier2FixedAmount;
     }
 
-    await this.paymentLinkRepository.update(paymentLink._id, paymentLink);
+    // Use updateOne — your existing pattern
+    await this.updateOne(paymentLink._id, updateData);
 
-    return paymentLink;
+    // Return fresh data
+    return await this.paymentLinkRepository.findOne({ _id: paymentLink._id });
   }
 
   async getPayerData(payment_link_id: string, unique_answer: string) {

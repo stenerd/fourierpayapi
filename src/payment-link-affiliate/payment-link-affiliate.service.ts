@@ -131,4 +131,69 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
 
     return participation;
   }
+
+  async getDashboardData(affiliateId: string) {
+    const participations = await this.paymentAffiliateRepository.find(
+      { affiliateId },
+      {},
+      {
+        populate: [
+          {
+            path: 'paymentLinkId',
+            select:
+              'name amount link affiliateEnabled tier1FixedAmount tier2FixedAmount',
+          },
+        ],
+      },
+    );
+
+    let totalEarnings = 0;
+    let tier1Earnings = 0;
+    let tier2Earnings = 0;
+    const sharedLinks: any[] = [];
+
+    for (const participation of participations) {
+      const link = participation.paymentLinkId as any;
+      const commission = participation.commissionAmount || 0;
+
+      if (participation.tier === 1) {
+        tier1Earnings += commission;
+      } else if (participation.tier === 2) {
+        tier2Earnings += commission;
+      }
+      totalEarnings += commission;
+
+      // Safe handling: only add to sharedLinks if link is properly populated
+      if (
+        link &&
+        link._id &&
+        link.name &&
+        link.amount !== undefined &&
+        link.link
+      ) {
+        const existing = sharedLinks.find(
+          (l) => l.paymentLinkId === link._id.toString(),
+        );
+
+        if (!existing) {
+          sharedLinks.push({
+            paymentLinkId: link._id.toString(),
+            name: link.name,
+            amount: link.amount,
+            shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
+            yourCommissionPerSale: commission,
+            tier: participation.tier,
+          });
+        }
+      }
+    }
+
+    return {
+      totalEarnings,
+      tier1Earnings,
+      tier2Earnings,
+      sharedLinksCount: sharedLinks.length,
+      sharedLinks,
+    };
+  }
 }

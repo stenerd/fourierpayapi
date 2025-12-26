@@ -100,4 +100,16 @@ export class PaymentLinkAffiliateController extends CoreController {
       HttpStatus.OK,
     );
   }
+
+  @Get('/dashboard')
+  @UseGuards(AuthGuard)
+  async getDashboard(
+    @CurrentUser() currentUser: IJWTUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const data = await this.paymentLinkAffiliateService.getDashboardData(
+      currentUser._id,
+    );
+    return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
+  }
 }

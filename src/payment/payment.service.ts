@@ -24,6 +24,7 @@ import { ViewPaymentDto } from './dto/view-payment.dto';
 import { IInitializePayment } from './payment.interface';
 import { Payment } from './payment.model';
 import { PaymentRepository } from './payment.repository';
+import { PaymentLinkAffiliateService } from 'src/payment-link-affiliate/payment-link-affiliate.service';
 
 @Injectable()
 export class PaymentService extends CoreService<PaymentRepository> {
@@ -36,6 +37,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService: WalletService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly paymentLinkAffiliateService: PaymentLinkAffiliateService,
   ) {
     super(paymentRepository);
   }
@@ -309,6 +311,32 @@ export class PaymentService extends CoreService<PaymentRepository> {
         }
 
         await session.commitTransaction();
+
+        // === AFFILIATE COMMISSION CREDITING ===
+        if (result.metadata?.referralCode) {
+          const referralCode = result.metadata.referralCode;
+
+          // Find all participation records for this link and referral code
+          const participations = await this.paymentLinkAffiliateService
+            .getRepository()
+            .find({
+              paymentLinkId: transaction.payment_link_id,
+              affiliateCode: referralCode,
+            });
+
+          if (participations.length > 0) {
+            for (const participation of participations) {
+              // Credit the affiliate
+              await this.userService.updateOne(
+                participation.affiliateId.toString(),
+                {
+                  $inc: { affiliateEarnings: participation.commissionAmount },
+                },
+              );
+            }
+          }
+        }
+        // === END AFFILIATE CREDITING ===
       } catch (error) {
         await session.abortTransaction();
         throw new BadRequestException('Something went wrong!');

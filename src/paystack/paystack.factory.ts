@@ -18,6 +18,14 @@ export class PaystackFactory {
   ): IInitializePaystack {
     const user: Record<string, any> = payment_link.creator_id;
 
+    let referralCode: string | null = null;
+    try {
+      const url = new URL(payment_link.link);
+      referralCode = url.searchParams.get('ref');
+    } catch (e) {
+      // Invalid URL — ignore
+    }
+
     const payload: IInitializePaystack = {
       reciever_id: user._id.toString(),
       entity: entity,
@@ -34,6 +42,7 @@ export class PaystackFactory {
         amount: data.amount,
         email: user.email,
         others: data.form,
+        referralCode: referralCode || null, // ← Added here
       },
       channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
     };

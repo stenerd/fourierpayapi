@@ -43,6 +43,12 @@ export class User {
     enum: RoleEnum,
   })
   role: RoleEnum;
+
+  @Prop({ unique: true, sparse: true })
+  affiliateCode?: string;
+
+  @Prop({ type: Number, default: 0 })
+  affiliateEarnings?: number;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

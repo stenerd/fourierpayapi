@@ -62,6 +62,20 @@ export class CreatePaymentAffiliateDto {
   @IsNumber()
   @IsNotEmpty()
   commissionAmount: number;
+
+  @ApiProperty({
+    type: String,
+    description:
+      'Optional parent affiliate code from ?ref= in URL (for Tier 2)',
+    required: false,
+    example: 'AFF123',
+  })
+  @IsOptional()
+  @IsString()
+  @Transform(({ value }: TransformFnParams) =>
+    (value as string)?.trim().toUpperCase(),
+  )
+  parentAffiliateCode?: string;
 }
 
 export class UpdatePaymentAffiliateDto {

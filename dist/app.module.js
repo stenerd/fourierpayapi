@@ -13,6 +13,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const user_module_1 = require("./user/user.module");
 const auth_module_1 = require("./auth/auth.module");
 const payment_link_module_1 = require("./payment-link/payment-link.module");
+const payment_link_affiliate_module_1 = require("./payment-link-affiliate/payment-link-affiliate.module");
 const transaction_module_1 = require("./transaction/transaction.module");
 const payment_module_1 = require("./payment/payment.module");
 const paystack_module_1 = require("./paystack/paystack.module");
@@ -105,6 +106,7 @@ AppModule = __decorate([
             admin_module_1.AdminModule,
             webhook_module_1.WebhookModule,
             school_module_1.SchoolModule,
+            payment_link_affiliate_module_1.PaymentLinkAffiliateModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

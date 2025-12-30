@@ -122,9 +122,6 @@ export class AuthService {
     return resp;
   }
 
-  // =============================================
-  // AFFILIATE REGISTRATION
-  // =============================================
   async affiliateRegister(dto: AffiliateRegisterDto) {
     // Check uniqueness
     const existingPhone = await this.userService.findOne({
@@ -133,30 +130,31 @@ export class AuthService {
     if (existingPhone)
       throw new BadRequestException('Phone number already registered');
 
-    const existingEmail = await this.userService.findOne({
-      email: dto.email.toLowerCase(),
-    });
+    const existingEmail = await this.userService.findOne({ email: dto.email });
     if (existingEmail)
       throw new BadRequestException('Email already registered');
 
-    const hashedPassword = await bcrypt.hash(dto.password, 12);
+    // Use the exact same create method as normal registration
+    const user = await this.userService.create({
+      firstname: dto.firstname,
+      lastname: dto.lastname,
+      email: dto.email,
+      phonenumber: dto.phonenumber,
+      password: dto.password,
+      role: RoleEnum.AFFILIATE,
+    });
 
+    // Generate affiliate code
     let affiliateCode: string;
     do {
       affiliateCode = randomBytes(4).toString('hex').toUpperCase();
     } while (await this.userService.findOne({ affiliateCode }));
 
-    const user = await this.userService.create({
-      firstname: dto.name.trim(),
-      lastname: '',
-      phonenumber: dto.phonenumber,
-      email: dto.email.toLowerCase(),
-      password: hashedPassword,
-      role: RoleEnum.AFFILIATE,
+    // Update with affiliate-specific fields
+    await this.userService.updateOne(user._id, {
       affiliateCode,
       affiliateEarnings: 0,
-      isActive: true,
-    } as any);
+    });
 
     const payload = {
       _id: user._id,
@@ -166,30 +164,31 @@ export class AuthService {
 
     const { accessToken } = await this.createTokens(payload);
 
+    const updatedUser = await this.userService.findOne({ _id: user._id });
+
     return {
       message: 'Affiliate registration successful',
       token: accessToken,
       user: {
-        id: user._id,
-        name: user.firstname,
-        email: user.email,
-        phonenumber: user.phonenumber,
-        role: user.role,
-        affiliateCode: user.affiliateCode,
+        id: updatedUser._id,
+        firstname: updatedUser.firstname,
+        lastname: updatedUser.lastname,
+        email: updatedUser.email,
+        phonenumber: updatedUser.phonenumber,
+        role: updatedUser.role,
+        affiliateCode: updatedUser.affiliateCode,
       },
     };
   }
 
-  // =============================================
-  // AFFILIATE LOGIN (EMAIL + PASSWORD)
-  // =============================================
   async affiliateLogin(dto: AffiliateLoginDto) {
     const user = await this.userService.findOne({
       email: dto.email.toLowerCase(),
     });
+    console.log('user', user);
 
     if (!user || user.role !== RoleEnum.AFFILIATE) {
-      throw new NotFoundException('Invalid credentials');
+      throw new NotFoundException('Invalid email/password provided.');
     }
 
     const passwordMatch = await this.comparePassword(
@@ -197,7 +196,7 @@ export class AuthService {
       user.password,
     );
     if (!passwordMatch) {
-      throw new NotFoundException('Invalid credentials');
+      throw new NotFoundException('Invalid email/password provided.');
     }
 
     const payload = {

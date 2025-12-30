@@ -1,41 +1,50 @@
-import {
-  IsString,
-  IsNotEmpty,
-  MinLength,
-  IsEmail,
-  IsOptional,
-} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Transform, TransformFnParams } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString, Length } from 'class-validator';
 
 export class AffiliateRegisterDto {
+  @ApiProperty({ description: 'First Name' })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  @Length(3, 100)
+  @Transform(({ value }: TransformFnParams) => (value as string)?.trim())
+  firstname: string;
 
+  @ApiProperty({ description: 'Last Name' })
+  @IsString()
+  @IsNotEmpty()
+  @Length(3, 100)
+  @Transform(({ value }: TransformFnParams) => (value as string)?.trim())
+  lastname: string;
+
+  @ApiProperty({ description: 'Phone Number' })
   @IsString()
   @IsNotEmpty()
   phonenumber: string;
 
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Email Address' })
   @IsEmail()
+  @IsNotEmpty()
+  @Transform(({ value }: TransformFnParams) =>
+    (value as string)?.trim().toLowerCase(),
+  )
   email: string;
 
+  @ApiProperty({ description: 'Password' })
   @IsString()
   @IsNotEmpty()
-  @MinLength(6)
+  @Length(8, 255)
+  @Transform(({ value }: TransformFnParams) => (value as string)?.trim())
   password: string;
-
-  @IsOptional()
-  @IsString()
-  parent_ref?: string;
 }
 
 export class AffiliateLoginDto {
-  @IsString()
-  @IsNotEmpty()
+  @ApiProperty({ description: 'Email Address' })
   @IsEmail()
-  email: string; // ← Now login with email
+  @IsNotEmpty()
+  email: string;
 
+  @ApiProperty({ description: 'Password' })
   @IsString()
   @IsNotEmpty()
   password: string;

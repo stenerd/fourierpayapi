@@ -37,5 +37,7 @@ export declare class User {
     isActive?: boolean;
     role_id: Types.ObjectId;
     role: RoleEnum;
+    affiliateCode?: string;
+    affiliateEarnings?: number;
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User>;

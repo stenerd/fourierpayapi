@@ -35,6 +35,8 @@ export class SheetUrl {
   secureUrl: string;
 }
 
+export const SheetUrlSchema = SchemaFactory.createForClass(SheetUrl);
+
 @Schema({ timestamps: true })
 export class PaymentLink {
   _id?: any;
@@ -107,7 +109,8 @@ export class PaymentLink {
   @Prop({ default: false })
   activate_public_link: boolean;
 
-  @Prop({ type: [SheetUrl], default: [] })
+  // FIXED LINE: Use SheetUrlSchema (the schema), not SheetUrl (the class)
+  @Prop({ type: [SheetUrlSchema], default: [] })
   sheetUrl: SheetUrl[];
 
   @Prop({ type: [FormSchema], default: [] })

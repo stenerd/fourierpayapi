@@ -52,5 +52,6 @@ export declare class Payment {
     reciever_id: Types.ObjectId;
     form?: Form[];
     status?: TransactionStatus;
+    referralCode?: string;
 }
 export declare const PaymentSchema: import("mongoose").Schema<Payment, import("mongoose").Model<Payment, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, Payment>;

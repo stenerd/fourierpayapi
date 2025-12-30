@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.PaymentLinkSchema = exports.PaymentLink = exports.SheetUrl = exports.FormSchema = exports.Form = void 0;
+exports.PaymentLinkSchema = exports.PaymentLink = exports.SheetUrlSchema = exports.SheetUrl = exports.FormSchema = exports.Form = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const payment_link_enum_1 = require("../payment-link.enum");
@@ -50,6 +50,7 @@ SheetUrl = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], SheetUrl);
 exports.SheetUrl = SheetUrl;
+exports.SheetUrlSchema = mongoose_1.SchemaFactory.createForClass(SheetUrl);
 let PaymentLink = class PaymentLink {
 };
 __decorate([
@@ -141,13 +142,25 @@ __decorate([
     __metadata("design:type", Boolean)
 ], PaymentLink.prototype, "activate_public_link", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.Types.Array }),
+    (0, mongoose_1.Prop)({ type: [exports.SheetUrlSchema], default: [] }),
     __metadata("design:type", Array)
 ], PaymentLink.prototype, "sheetUrl", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ type: [exports.FormSchema], default: [] }),
     __metadata("design:type", Array)
 ], PaymentLink.prototype, "form", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], PaymentLink.prototype, "affiliateEnabled", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: null }),
+    __metadata("design:type", Number)
+], PaymentLink.prototype, "tier1FixedAmount", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: null }),
+    __metadata("design:type", Number)
+], PaymentLink.prototype, "tier2FixedAmount", void 0);
 PaymentLink = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], PaymentLink);

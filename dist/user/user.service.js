@@ -71,7 +71,13 @@ let UserService = class UserService extends service_core_1.CoreService {
             name: `${user.firstname} ${user.lastname}`,
             link: `https://app.fourierpay.com/login?token=${user.token}`,
         };
-        this.emailService.sendMailtrapMailAPI('welcome', emailData, (0, welcome_1.welcomeHTML)(emailData), user.email, 'Verify Your Email and Unlock the Power of Fourierpay!');
+        if (data.role !== user_enum_1.RoleEnum.AFFILIATE) {
+            const emailData = {
+                name: `${user.firstname} ${user.lastname}`,
+                link: `https://app.fourierpay.com/login?token=${user.token}`,
+            };
+            this.emailService.sendMailtrapMailAPI('welcome', emailData, (0, welcome_1.welcomeHTML)(emailData), user.email, 'Verify Your Email and Unlock the Power of Fourierpay!');
+        }
         return user;
     }
     async updateUser(data, user_id) {

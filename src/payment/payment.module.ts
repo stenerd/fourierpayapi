@@ -10,12 +10,14 @@ import { PaystackModule } from 'src/paystack/paystack.module';
 import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
 import { PaymentFactory } from './payment.factory';
 import { WalletModule } from 'src/wallet/wallet.module';
+import { PaymentLinkAffiliateModule } from 'src/payment-link-affiliate/payment-link-affiliate.module';
 
 @Module({
   imports: [
     UserModule,
     TransactionModule,
     WalletModule,
+    PaymentLinkAffiliateModule,
     PaystackModule,
     PaymentLinkModule,
     MongooseModule.forFeature([{ name: 'Payment', schema: PaymentSchema }]),

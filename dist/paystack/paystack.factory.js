@@ -11,6 +11,13 @@ const common_1 = require("@nestjs/common");
 let PaystackFactory = class PaystackFactory {
     initilizePaymentPayload(data, reference, payment_link, payment, entity) {
         const user = payment_link.creator_id;
+        let referralCode = null;
+        try {
+            const url = new URL(payment_link.link);
+            referralCode = url.searchParams.get('ref');
+        }
+        catch (e) {
+        }
         const payload = {
             reciever_id: user._id.toString(),
             entity: entity,
@@ -27,6 +34,7 @@ let PaystackFactory = class PaystackFactory {
                 amount: data.amount,
                 email: user.email,
                 others: data.form,
+                referralCode: referralCode || null,
             },
             channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
         };

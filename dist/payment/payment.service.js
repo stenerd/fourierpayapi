@@ -22,8 +22,9 @@ const transaction_service_1 = require("../transaction/transaction.service");
 const user_service_1 = require("../user/user.service");
 const wallet_service_1 = require("../wallet/wallet.service");
 const payment_repository_1 = require("./payment.repository");
+const payment_link_affiliate_service_1 = require("../payment-link-affiliate/payment-link-affiliate.service");
 let PaymentService = class PaymentService extends service_core_1.CoreService {
-    constructor(paymentRepository, paystackService, paystackFactory, paymentLinkService, transactionService, walletService, configService, userService) {
+    constructor(paymentRepository, paystackService, paystackFactory, paymentLinkService, transactionService, walletService, configService, userService, paymentLinkAffiliateService) {
         super(paymentRepository);
         this.paymentRepository = paymentRepository;
         this.paystackService = paystackService;
@@ -33,6 +34,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         this.walletService = walletService;
         this.configService = configService;
         this.userService = userService;
+        this.paymentLinkAffiliateService = paymentLinkAffiliateService;
     }
     async newPayment(data) {
         const payment = await this.paymentRepository.create(Object.assign({}, data));
@@ -105,6 +107,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         return Object.assign(Object.assign({}, generate_paystack_payload), { publicKey: this.configService.get('PAYSTACK_PUBLIC') });
     }
     async verifyPayment(dto) {
+        var _a;
         const result = await this.paystackService.verifyPayment(dto.reference);
         const { metadata, amount, } = result;
         console.log('amount >> ', amount, dto.reference);
@@ -197,6 +200,22 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                     };
                 }
                 await session.commitTransaction();
+                if ((_a = result.metadata) === null || _a === void 0 ? void 0 : _a.referralCode) {
+                    const referralCode = result.metadata.referralCode;
+                    const participations = await this.paymentLinkAffiliateService
+                        .getRepository()
+                        .find({
+                        paymentLinkId: transaction.payment_link_id,
+                        affiliateCode: referralCode,
+                    });
+                    if (participations.length > 0) {
+                        for (const participation of participations) {
+                            await this.userService.updateOne(participation.affiliateId.toString(), {
+                                $inc: { affiliateEarnings: participation.commissionAmount },
+                            });
+                        }
+                    }
+                }
             }
             catch (error) {
                 await session.abortTransaction();
@@ -463,7 +482,8 @@ PaymentService = __decorate([
         transaction_service_1.TransactionService,
         wallet_service_1.WalletService,
         config_1.ConfigService,
-        user_service_1.UserService])
+        user_service_1.UserService,
+        payment_link_affiliate_service_1.PaymentLinkAffiliateService])
 ], PaymentService);
 exports.PaymentService = PaymentService;
 //# sourceMappingURL=payment.service.js.map

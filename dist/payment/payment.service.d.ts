@@ -12,6 +12,7 @@ import { ViewPaymentDto } from './dto/view-payment.dto';
 import { IInitializePayment } from './payment.interface';
 import { Payment } from './payment.model';
 import { PaymentRepository } from './payment.repository';
+import { PaymentLinkAffiliateService } from 'src/payment-link-affiliate/payment-link-affiliate.service';
 export declare class PaymentService extends CoreService<PaymentRepository> {
     private readonly paymentRepository;
     private readonly paystackService;
@@ -21,7 +22,8 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService;
     private readonly configService;
     private readonly userService;
-    constructor(paymentRepository: PaymentRepository, paystackService: PaystackService, paystackFactory: PaystackFactory, paymentLinkService: PaymentLinkService, transactionService: TransactionService, walletService: WalletService, configService: ConfigService, userService: UserService);
+    private readonly paymentLinkAffiliateService;
+    constructor(paymentRepository: PaymentRepository, paystackService: PaystackService, paystackFactory: PaystackFactory, paymentLinkService: PaymentLinkService, transactionService: TransactionService, walletService: WalletService, configService: ConfigService, userService: UserService, paymentLinkAffiliateService: PaymentLinkAffiliateService);
     newPayment(data: IInitializePayment): Promise<Payment>;
     initializePayment(dto: InitializePaymentDto): Promise<Record<string, any>>;
     verifyPayment(dto: VerifyPaymentDto): Promise<Record<string, any>>;

@@ -19,6 +19,7 @@ const paystack_module_1 = require("../paystack/paystack.module");
 const payment_link_module_1 = require("../payment-link/payment-link.module");
 const payment_factory_1 = require("./payment.factory");
 const wallet_module_1 = require("../wallet/wallet.module");
+const payment_link_affiliate_module_1 = require("../payment-link-affiliate/payment-link-affiliate.module");
 let PaymentModule = class PaymentModule {
 };
 PaymentModule = __decorate([
@@ -27,6 +28,7 @@ PaymentModule = __decorate([
             user_module_1.UserModule,
             transaction_module_1.TransactionModule,
             wallet_module_1.WalletModule,
+            payment_link_affiliate_module_1.PaymentLinkAffiliateModule,
             paystack_module_1.PaystackModule,
             payment_link_module_1.PaymentLinkModule,
             mongoose_1.MongooseModule.forFeature([{ name: 'Payment', schema: payment_model_1.PaymentSchema }]),

@@ -104,6 +104,7 @@ export class UserService extends CoreService<UserRepository> {
     //   'Verify Your Email and Unlock the Power of Fourierpay!',
     // );
 
+    // Do not send welcome email to affiliates
     if (data.role !== RoleEnum.AFFILIATE) {
       const emailData = {
         name: `${user.firstname} ${user.lastname}`,

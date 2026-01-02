@@ -67,10 +67,6 @@ let UserService = class UserService extends service_core_1.CoreService {
             throw new common_1.InternalServerErrorException();
         }
         await this.subscriptionService.createSubscription(user._id, subscription_setting._id);
-        const emailData = {
-            name: `${user.firstname} ${user.lastname}`,
-            link: `https://app.fourierpay.com/login?token=${user.token}`,
-        };
         if (data.role !== user_enum_1.RoleEnum.AFFILIATE) {
             const emailData = {
                 name: `${user.firstname} ${user.lastname}`,

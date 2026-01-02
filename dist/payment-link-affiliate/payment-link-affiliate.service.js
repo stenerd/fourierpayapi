@@ -86,17 +86,6 @@ let PaymentLinkAffiliateService = class PaymentLinkAffiliateService extends serv
         });
         return participations;
     }
-    async updateParticipation(id, dto, user_id) {
-        const participation = await this.findOne({ _id: id });
-        if (!participation) {
-            throw new common_1.BadRequestException('Participation record not found');
-        }
-        if (dto.commissionAmount !== undefined) {
-            participation.commissionAmount = dto.commissionAmount;
-        }
-        await this.updateOne(id, dto);
-        return participation;
-    }
     async getDashboardData(affiliateId) {
         const participations = await this.paymentAffiliateRepository.find({ affiliateId }, {}, {
             populate: [

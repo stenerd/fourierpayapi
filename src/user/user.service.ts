@@ -86,11 +86,6 @@ export class UserService extends CoreService<UserRepository> {
       subscription_setting._id,
     );
 
-    const emailData = {
-      name: `${user.firstname} ${user.lastname}`,
-      link: `https://app.fourierpay.com/login?token=${user.token}`,
-    };
-
     // this.emailService.sendBrevoMailAPI(
     //   'welcome',
     //   emailData,
@@ -119,7 +114,6 @@ export class UserService extends CoreService<UserRepository> {
         'Verify Your Email and Unlock the Power of Fourierpay!',
       );
     }
-
     return user;
   }
 

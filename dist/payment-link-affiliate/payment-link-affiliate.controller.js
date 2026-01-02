@@ -17,7 +17,6 @@ const common_1 = require("@nestjs/common");
 const controller_core_1 = require("../common/core/controller.core");
 const payment_link_affiliate_service_1 = require("./payment-link-affiliate.service");
 const create_payment_affiliate_dto_1 = require("./dto/create-payment-affiliate.dto");
-const update_payment_affiliate_dto_1 = require("./dto/update-payment-affiliate.dto");
 const auth_guards_1 = require("../common/guards/auth.guards");
 const current_user_decorator_1 = require("../common/decorators/current-user.decorator");
 const user_enum_1 = require("../user/user.enum");
@@ -37,10 +36,6 @@ let PaymentLinkAffiliateController = class PaymentLinkAffiliateController extend
     async getByAffiliate(affiliateId, currentUser, res) {
         const result = await this.paymentLinkAffiliateService.getByAffiliate(affiliateId);
         return this.responseSuccess(res, '00', 'Success', result, common_1.HttpStatus.OK);
-    }
-    async update(id, dto, currentUser, res) {
-        const result = await this.paymentLinkAffiliateService.updateParticipation(id, dto, currentUser._id);
-        return this.responseSuccess(res, '00', 'Commission updated successfully', result, common_1.HttpStatus.OK);
     }
     async getDashboard(currentUser, res) {
         const data = await this.paymentLinkAffiliateService.getDashboardData(currentUser._id);
@@ -77,17 +72,6 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], PaymentLinkAffiliateController.prototype, "getByAffiliate", null);
-__decorate([
-    (0, common_1.Put)('/:id'),
-    (0, common_1.UseGuards)(auth_guards_1.AuthGuard),
-    __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Body)()),
-    __param(2, (0, current_user_decorator_1.CurrentUser)()),
-    __param(3, (0, common_1.Res)({ passthrough: true })),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_payment_affiliate_dto_1.UpdatePaymentAffiliateDto, Object, Object]),
-    __metadata("design:returntype", Promise)
-], PaymentLinkAffiliateController.prototype, "update", null);
 __decorate([
     (0, common_1.Get)('/dashboard'),
     (0, common_1.UseGuards)(auth_guards_1.AuthGuard),

@@ -1,7 +1,6 @@
 import { CoreService } from 'src/common/core/service.core';
 import { PaymentAffiliateRepository } from './repositories/payment-link-affiliate.repository';
 import { CreatePaymentAffiliateDto } from './dto/create-payment-affiliate.dto';
-import { UpdatePaymentAffiliateDto } from './dto/update-payment-affiliate.dto';
 import { UserRepository } from 'src/user/user.repository';
 import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
 export declare class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRepository> {
@@ -17,7 +16,6 @@ export declare class PaymentLinkAffiliateService extends CoreService<PaymentAffi
     }>;
     getByPaymentLink(paymentLinkId: string, user_id: string | null): Promise<import("./models/payment-link-affiliate.model").PaymentAffiliateDocument[]>;
     getByAffiliate(affiliateId: string): Promise<import("./models/payment-link-affiliate.model").PaymentAffiliateDocument[]>;
-    updateParticipation(id: string, dto: UpdatePaymentAffiliateDto, user_id: string): Promise<any>;
     getDashboardData(affiliateId: string): Promise<{
         totalEarnings: number;
         tier1Earnings: number;

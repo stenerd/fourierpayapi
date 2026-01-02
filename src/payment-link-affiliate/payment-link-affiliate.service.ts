@@ -24,6 +24,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
       _id: dto.paymentLinkId,
       affiliateEnabled: true,
     });
+
     if (!paymentLink) {
       throw new BadRequestException(
         'Payment link not found or affiliate program not enabled',
@@ -110,26 +111,6 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
     );
 
     return participations;
-  }
-
-  // Update commission amount for a specific participation
-  async updateParticipation(
-    id: string,
-    dto: UpdatePaymentAffiliateDto,
-    user_id: string,
-  ) {
-    const participation = await this.findOne({ _id: id });
-    if (!participation) {
-      throw new BadRequestException('Participation record not found');
-    }
-
-    if (dto.commissionAmount !== undefined) {
-      participation.commissionAmount = dto.commissionAmount;
-    }
-
-    await this.updateOne(id, dto);
-
-    return participation;
   }
 
   async getDashboardData(affiliateId: string) {

@@ -43,9 +43,8 @@ export class AuthGuard implements CanActivate {
     if (!authToken) return false;
 
     const authData: any = jwt.decode(authToken, { complete: true });
-
+    
     if (!authData || !authData.payload) return false;
-
     const userExist = await this.userService.findOne({
       _id: authData.payload._id,
     });

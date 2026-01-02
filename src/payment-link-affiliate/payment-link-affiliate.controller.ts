@@ -78,29 +78,6 @@ export class PaymentLinkAffiliateController extends CoreController {
     return this.responseSuccess(res, '00', 'Success', result, HttpStatus.OK);
   }
 
-  // Update commission amount for a specific participation (merchant override)
-  @Put('/:id')
-  @UseGuards(AuthGuard)
-  async update(
-    @Param('id') id: string,
-    @Body() dto: UpdatePaymentAffiliateDto,
-    @CurrentUser() currentUser: IJWTUser,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const result = await this.paymentLinkAffiliateService.updateParticipation(
-      id,
-      dto,
-      currentUser._id,
-    );
-    return this.responseSuccess(
-      res,
-      '00',
-      'Commission updated successfully',
-      result,
-      HttpStatus.OK,
-    );
-  }
-
   @Get('/dashboard')
   @UseGuards(AuthGuard)
   async getDashboard(

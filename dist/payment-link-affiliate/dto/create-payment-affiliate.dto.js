@@ -13,23 +13,8 @@ exports.UpdatePaymentAffiliateDto = exports.CreatePaymentAffiliateDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_transformer_1 = require("class-transformer");
 const class_validator_1 = require("class-validator");
-var AffiliateTier;
-(function (AffiliateTier) {
-    AffiliateTier[AffiliateTier["TIER_1"] = 1] = "TIER_1";
-    AffiliateTier[AffiliateTier["TIER_2"] = 2] = "TIER_2";
-})(AffiliateTier || (AffiliateTier = {}));
 class CreatePaymentAffiliateDto {
 }
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: String,
-        description: 'Affiliate user ID (ObjectId)',
-        example: '64f1a2b3c4d5e6f7g8h9i0j1',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", String)
-], CreatePaymentAffiliateDto.prototype, "affiliateId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: String,
@@ -37,40 +22,8 @@ __decorate([
         example: '64f1a2b3c4d5e6f7g8h9i0j2',
     }),
     (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreatePaymentAffiliateDto.prototype, "paymentLinkId", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: String,
-        description: "The affiliate's unique code (e.g., from ?ref=)",
-        example: 'AFF123',
-    }),
-    (0, class_validator_1.IsString)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    (0, class_transformer_1.Transform)(({ value }) => value === null || value === void 0 ? void 0 : value.trim().toUpperCase()),
-    __metadata("design:type", String)
-], CreatePaymentAffiliateDto.prototype, "affiliateCode", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        enum: AffiliateTier,
-        description: 'Tier: 1 for direct affiliate, 2 for recruiter',
-        example: 1,
-    }),
-    (0, class_validator_1.IsEnum)(AffiliateTier),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreatePaymentAffiliateDto.prototype, "tier", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        type: Number,
-        description: 'Fixed commission amount in ₦ per successful payment',
-        example: 5000,
-    }),
-    (0, class_validator_1.IsNumber)(),
-    (0, class_validator_1.IsNotEmpty)(),
-    __metadata("design:type", Number)
-], CreatePaymentAffiliateDto.prototype, "commissionAmount", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         type: String,

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { PaymentService } from './payment.service';
 import { PaymentController } from './payment.controller';
 import { PaymentRepository } from './payment.repository';
@@ -17,7 +17,7 @@ import { PaymentLinkAffiliateModule } from 'src/payment-link-affiliate/payment-l
     UserModule,
     TransactionModule,
     WalletModule,
-    PaymentLinkAffiliateModule,
+    forwardRef(() => PaymentLinkAffiliateModule),
     PaystackModule,
     PaymentLinkModule,
     MongooseModule.forFeature([{ name: 'Payment', schema: PaymentSchema }]),

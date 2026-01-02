@@ -15,6 +15,7 @@ const payment_link_affiliate_repository_1 = require("./repositories/payment-link
 const payment_link_affiliate_model_1 = require("./models/payment-link-affiliate.model");
 const user_module_1 = require("../user/user.module");
 const payment_link_module_1 = require("../payment-link/payment-link.module");
+const payment_module_1 = require("../payment/payment.module");
 let PaymentLinkAffiliateModule = class PaymentLinkAffiliateModule {
 };
 PaymentLinkAffiliateModule = __decorate([
@@ -24,6 +25,7 @@ PaymentLinkAffiliateModule = __decorate([
                 { name: 'PaymentAffiliate', schema: payment_link_affiliate_model_1.PaymentAffiliateSchema },
             ]),
             user_module_1.UserModule,
+            payment_module_1.PaymentModule,
             payment_link_module_1.PaymentLinkModule,
         ],
         controllers: [payment_link_affiliate_controller_1.PaymentLinkAffiliateController],

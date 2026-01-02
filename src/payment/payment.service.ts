@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CoreService } from 'src/common/core/service.core';
 import {
@@ -37,6 +42,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService: WalletService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    @Inject(forwardRef(() => PaymentLinkAffiliateService)) // ✅ Add this
     private readonly paymentLinkAffiliateService: PaymentLinkAffiliateService,
   ) {
     super(paymentRepository);
@@ -682,5 +688,9 @@ export class PaymentService extends CoreService<PaymentRepository> {
     console.log('payment_link >> ', payment_link);
 
     return { transaction, payment_link };
+  }
+
+  async findPayments(query: any) {
+    return this.paymentRepository.find(query);
   }
 }

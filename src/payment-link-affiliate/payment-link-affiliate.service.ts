@@ -2,10 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { CoreService } from 'src/common/core/service.core';
 import { PaymentAffiliateRepository } from './repositories/payment-link-affiliate.repository';
 import { CreatePaymentAffiliateDto } from './dto/create-payment-affiliate.dto';
-import { UpdatePaymentAffiliateDto } from './dto/update-payment-affiliate.dto';
-import { PaymentAffiliate } from './models/payment-link-affiliate.model';
 import { UserRepository } from 'src/user/user.repository';
 import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
+import { TransactionStatus } from 'src/transaction/transaction.enum';
+import { PaymentService } from 'src/payment/payment.service';
 
 @Injectable()
 export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRepository> {
@@ -13,6 +13,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
     private readonly paymentAffiliateRepository: PaymentAffiliateRepository,
     private readonly userRepository: UserRepository,
     private readonly paymentLinkRepository: PaymentLinkRepository,
+    private readonly paymentService: PaymentService,
   ) {
     super(paymentAffiliateRepository);
   }
@@ -114,6 +115,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
   }
 
   async getDashboardData(affiliateId: string) {
+    // Get all participations for this affiliate (to know links, tiers, rates)
     const participations = await this.paymentAffiliateRepository.find(
       { affiliateId },
       {},
@@ -121,20 +123,46 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
         populate: [
           {
             path: 'paymentLinkId',
-            select:
-              'name amount link affiliateEnabled tier1FixedAmount tier2FixedAmount',
+            select: 'name amount link tier1FixedAmount tier2FixedAmount',
           },
         ],
       },
     );
 
+    // Get the affiliate's code for querying payments
+    const affiliate = await this.userRepository.findOne({ _id: affiliateId });
+    if (!affiliate || !affiliate.affiliateCode) {
+      return {
+        totalEarnings: 0,
+        tier1Earnings: 0,
+        tier2Earnings: 0,
+        sharedLinksCount: 0,
+        sharedLinks: [],
+      };
+    }
+
+    const affiliateCode = affiliate.affiliateCode;
+
+    // Find all PAID payments that used this affiliate's code
+    const paidPayments = await this.paymentService.findPayments({
+      affiliateCode,
+      status: TransactionStatus.PAID,
+    });
+
     let totalEarnings = 0;
     let tier1Earnings = 0;
     let tier2Earnings = 0;
-    const sharedLinks: any[] = [];
 
-    for (const participation of participations) {
-      const link = participation.paymentLinkId as any;
+    const paymentCounts = new Map<string, number>(); // paymentLinkId → count of paid payments
+
+    for (const payment of paidPayments) {
+      const participation = participations.find(
+        (p) =>
+          p.paymentLinkId._id.toString() === payment.payment_link_id.toString(),
+      );
+
+      if (!participation) continue;
+
       const commission = participation.commissionAmount || 0;
 
       if (participation.tier === 1) {
@@ -144,30 +172,28 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
       }
       totalEarnings += commission;
 
-      // Safe handling: only add to sharedLinks if link is properly populated
-      if (
-        link &&
-        link._id &&
-        link.name &&
-        link.amount !== undefined &&
-        link.link
-      ) {
-        const existing = sharedLinks.find(
-          (l) => l.paymentLinkId === link._id.toString(),
-        );
-
-        if (!existing) {
-          sharedLinks.push({
-            paymentLinkId: link._id.toString(),
-            name: link.name,
-            amount: link.amount,
-            shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
-            yourCommissionPerSale: commission,
-            tier: participation.tier,
-          });
-        }
-      }
+      // Count payments per link
+      const linkId = participation.paymentLinkId._id.toString();
+      paymentCounts.set(linkId, (paymentCounts.get(linkId) || 0) + 1);
     }
+
+    // Build shared links list
+    const sharedLinks = participations.map((participation) => {
+      const link = participation.paymentLinkId as any;
+      const linkId = link._id.toString();
+      const paidCount = paymentCounts.get(linkId) || 0;
+
+      return {
+        paymentLinkId: linkId,
+        name: link.name,
+        amount: link.amount,
+        shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
+        yourCommissionPerSale: participation.commissionAmount || 0,
+        tier: participation.tier,
+        paidSalesCount: paidCount,
+        earnedFromThisLink: (participation.commissionAmount || 0) * paidCount,
+      };
+    });
 
     return {
       totalEarnings,

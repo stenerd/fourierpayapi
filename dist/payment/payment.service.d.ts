@@ -78,4 +78,5 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
         transaction: any;
         payment_link: any;
     }>;
+    findPayments(query: any): Promise<import("./payment.model").PaymentDocument[]>;
 }

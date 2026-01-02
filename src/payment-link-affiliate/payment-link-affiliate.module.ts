@@ -6,7 +6,7 @@ import { PaymentAffiliateRepository } from './repositories/payment-link-affiliat
 import { PaymentAffiliateSchema } from './models/payment-link-affiliate.model';
 import { UserModule } from 'src/user/user.module';
 import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
-
+import { PaymentModule } from 'src/payment/payment.module';
 
 @Module({
   imports: [
@@ -14,6 +14,7 @@ import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
       { name: 'PaymentAffiliate', schema: PaymentAffiliateSchema },
     ]),
     UserModule,
+    PaymentModule,
     PaymentLinkModule,
   ],
   controllers: [PaymentLinkAffiliateController],

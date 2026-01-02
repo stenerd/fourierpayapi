@@ -28,7 +28,7 @@ PaymentModule = __decorate([
             user_module_1.UserModule,
             transaction_module_1.TransactionModule,
             wallet_module_1.WalletModule,
-            payment_link_affiliate_module_1.PaymentLinkAffiliateModule,
+            (0, common_1.forwardRef)(() => payment_link_affiliate_module_1.PaymentLinkAffiliateModule),
             paystack_module_1.PaystackModule,
             payment_link_module_1.PaymentLinkModule,
             mongoose_1.MongooseModule.forFeature([{ name: 'Payment', schema: payment_model_1.PaymentSchema }]),

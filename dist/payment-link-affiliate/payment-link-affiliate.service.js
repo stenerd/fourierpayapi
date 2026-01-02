@@ -15,12 +15,15 @@ const service_core_1 = require("../common/core/service.core");
 const payment_link_affiliate_repository_1 = require("./repositories/payment-link-affiliate.repository");
 const user_repository_1 = require("../user/user.repository");
 const payment_link_repository_1 = require("../payment-link/repositories/payment-link.repository");
+const transaction_enum_1 = require("../transaction/transaction.enum");
+const payment_service_1 = require("../payment/payment.service");
 let PaymentLinkAffiliateService = class PaymentLinkAffiliateService extends service_core_1.CoreService {
-    constructor(paymentAffiliateRepository, userRepository, paymentLinkRepository) {
+    constructor(paymentAffiliateRepository, userRepository, paymentLinkRepository, paymentService) {
         super(paymentAffiliateRepository);
         this.paymentAffiliateRepository = paymentAffiliateRepository;
         this.userRepository = userRepository;
         this.paymentLinkRepository = paymentLinkRepository;
+        this.paymentService = paymentService;
     }
     async createParticipation(dto, user_id) {
         const paymentLink = await this.paymentLinkRepository.findOne({
@@ -91,16 +94,33 @@ let PaymentLinkAffiliateService = class PaymentLinkAffiliateService extends serv
             populate: [
                 {
                     path: 'paymentLinkId',
-                    select: 'name amount link affiliateEnabled tier1FixedAmount tier2FixedAmount',
+                    select: 'name amount link tier1FixedAmount tier2FixedAmount',
                 },
             ],
+        });
+        const affiliate = await this.userRepository.findOne({ _id: affiliateId });
+        if (!affiliate || !affiliate.affiliateCode) {
+            return {
+                totalEarnings: 0,
+                tier1Earnings: 0,
+                tier2Earnings: 0,
+                sharedLinksCount: 0,
+                sharedLinks: [],
+            };
+        }
+        const affiliateCode = affiliate.affiliateCode;
+        const paidPayments = await this.paymentService.findPayments({
+            affiliateCode,
+            status: transaction_enum_1.TransactionStatus.PAID,
         });
         let totalEarnings = 0;
         let tier1Earnings = 0;
         let tier2Earnings = 0;
-        const sharedLinks = [];
-        for (const participation of participations) {
-            const link = participation.paymentLinkId;
+        const paymentCounts = new Map();
+        for (const payment of paidPayments) {
+            const participation = participations.find((p) => p.paymentLinkId._id.toString() === payment.payment_link_id.toString());
+            if (!participation)
+                continue;
             const commission = participation.commissionAmount || 0;
             if (participation.tier === 1) {
                 tier1Earnings += commission;
@@ -109,24 +129,24 @@ let PaymentLinkAffiliateService = class PaymentLinkAffiliateService extends serv
                 tier2Earnings += commission;
             }
             totalEarnings += commission;
-            if (link &&
-                link._id &&
-                link.name &&
-                link.amount !== undefined &&
-                link.link) {
-                const existing = sharedLinks.find((l) => l.paymentLinkId === link._id.toString());
-                if (!existing) {
-                    sharedLinks.push({
-                        paymentLinkId: link._id.toString(),
-                        name: link.name,
-                        amount: link.amount,
-                        shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
-                        yourCommissionPerSale: commission,
-                        tier: participation.tier,
-                    });
-                }
-            }
+            const linkId = participation.paymentLinkId._id.toString();
+            paymentCounts.set(linkId, (paymentCounts.get(linkId) || 0) + 1);
         }
+        const sharedLinks = participations.map((participation) => {
+            const link = participation.paymentLinkId;
+            const linkId = link._id.toString();
+            const paidCount = paymentCounts.get(linkId) || 0;
+            return {
+                paymentLinkId: linkId,
+                name: link.name,
+                amount: link.amount,
+                shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
+                yourCommissionPerSale: participation.commissionAmount || 0,
+                tier: participation.tier,
+                paidSalesCount: paidCount,
+                earnedFromThisLink: (participation.commissionAmount || 0) * paidCount,
+            };
+        });
         return {
             totalEarnings,
             tier1Earnings,
@@ -140,7 +160,8 @@ PaymentLinkAffiliateService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [payment_link_affiliate_repository_1.PaymentAffiliateRepository,
         user_repository_1.UserRepository,
-        payment_link_repository_1.PaymentLinkRepository])
+        payment_link_repository_1.PaymentLinkRepository,
+        payment_service_1.PaymentService])
 ], PaymentLinkAffiliateService);
 exports.PaymentLinkAffiliateService = PaymentLinkAffiliateService;
 //# sourceMappingURL=payment-link-affiliate.service.js.map

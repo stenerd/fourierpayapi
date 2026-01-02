@@ -84,7 +84,7 @@ export class Payment {
   status?: TransactionStatus;
 
   @Prop({ type: String })
-  referralCode?: string;
+  affiliateCode?: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

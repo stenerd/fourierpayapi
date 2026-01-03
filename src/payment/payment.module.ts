@@ -11,6 +11,7 @@ import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
 import { PaymentFactory } from './payment.factory';
 import { WalletModule } from 'src/wallet/wallet.module';
 import { PaymentLinkAffiliateModule } from 'src/payment-link-affiliate/payment-link-affiliate.module';
+import { CommissionModule } from 'src/commissions/commission.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { PaymentLinkAffiliateModule } from 'src/payment-link-affiliate/payment-l
     forwardRef(() => PaymentLinkAffiliateModule),
     PaystackModule,
     PaymentLinkModule,
+    CommissionModule,
     MongooseModule.forFeature([{ name: 'Payment', schema: PaymentSchema }]),
   ],
   controllers: [PaymentController],

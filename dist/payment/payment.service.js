@@ -24,10 +24,11 @@ const transaction_enum_1 = require("../transaction/transaction.enum");
 const transaction_service_1 = require("../transaction/transaction.service");
 const user_service_1 = require("../user/user.service");
 const wallet_service_1 = require("../wallet/wallet.service");
+const commission_service_1 = require("../commissions/commission.service");
 const payment_repository_1 = require("./payment.repository");
 const payment_link_affiliate_service_1 = require("../payment-link-affiliate/payment-link-affiliate.service");
 let PaymentService = class PaymentService extends service_core_1.CoreService {
-    constructor(paymentRepository, paystackService, paystackFactory, paymentLinkService, transactionService, walletService, configService, userService, paymentLinkAffiliateService) {
+    constructor(paymentRepository, paystackService, paystackFactory, paymentLinkService, transactionService, walletService, configService, userService, commissionService, paymentLinkAffiliateService) {
         super(paymentRepository);
         this.paymentRepository = paymentRepository;
         this.paystackService = paystackService;
@@ -37,6 +38,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         this.walletService = walletService;
         this.configService = configService;
         this.userService = userService;
+        this.commissionService = commissionService;
         this.paymentLinkAffiliateService = paymentLinkAffiliateService;
     }
     async newPayment(data) {
@@ -110,7 +112,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         return Object.assign(Object.assign({}, generate_paystack_payload), { publicKey: this.configService.get('PAYSTACK_PUBLIC') });
     }
     async verifyPayment(dto) {
-        var _a;
         const result = await this.paystackService.verifyPayment(dto.reference);
         const { metadata, amount, } = result;
         console.log('amount >> ', amount, dto.reference);
@@ -203,16 +204,23 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                     };
                 }
                 await session.commitTransaction();
-                if ((_a = result.metadata) === null || _a === void 0 ? void 0 : _a.referralCode) {
-                    const referralCode = result.metadata.referralCode;
+                if (transaction.affiliateCode) {
+                    const affiliateCode = transaction.affiliateCode;
                     const participations = await this.paymentLinkAffiliateService
                         .getRepository()
                         .find({
                         paymentLinkId: transaction.payment_link_id,
-                        affiliateCode: referralCode,
+                        affiliateCode: affiliateCode,
                     });
                     if (participations.length > 0) {
                         for (const participation of participations) {
+                            await this.commissionService.createCommission({
+                                affiliateId: participation.affiliateId,
+                                paymentId: transaction._id,
+                                paymentLinkId: participation.paymentLinkId,
+                                tier: participation.tier,
+                                amount: participation.commissionAmount,
+                            });
                             await this.userService.updateOne(participation.affiliateId.toString(), {
                                 $inc: { affiliateEarnings: participation.commissionAmount },
                             });
@@ -481,7 +489,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
 };
 PaymentService = __decorate([
     (0, common_1.Injectable)(),
-    __param(8, (0, common_1.Inject)((0, common_1.forwardRef)(() => payment_link_affiliate_service_1.PaymentLinkAffiliateService))),
+    __param(9, (0, common_1.Inject)((0, common_1.forwardRef)(() => payment_link_affiliate_service_1.PaymentLinkAffiliateService))),
     __metadata("design:paramtypes", [payment_repository_1.PaymentRepository,
         paystack_service_1.PaystackService,
         paystack_factory_1.PaystackFactory,
@@ -490,6 +498,7 @@ PaymentService = __decorate([
         wallet_service_1.WalletService,
         config_1.ConfigService,
         user_service_1.UserService,
+        commission_service_1.CommissionService,
         payment_link_affiliate_service_1.PaymentLinkAffiliateService])
 ], PaymentService);
 exports.PaymentService = PaymentService;

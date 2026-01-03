@@ -21,6 +21,7 @@ import {
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UserService } from 'src/user/user.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { CommissionService } from 'src/commissions/commission.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -42,6 +43,7 @@ export class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService: WalletService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly commissionService: CommissionService,
     @Inject(forwardRef(() => PaymentLinkAffiliateService)) // ✅ Add this
     private readonly paymentLinkAffiliateService: PaymentLinkAffiliateService,
   ) {
@@ -319,20 +321,30 @@ export class PaymentService extends CoreService<PaymentRepository> {
         await session.commitTransaction();
 
         // === AFFILIATE COMMISSION CREDITING ===
-        if (result.metadata?.referralCode) {
-          const referralCode = result.metadata.referralCode;
+        if (transaction.affiliateCode) {
+          // ← change to affiliateCode (or keep referralCode if that's your field)
+          const affiliateCode = transaction.affiliateCode;
 
-          // Find all participation records for this link and referral code
+          // Find all participation records for this link and affiliate code
           const participations = await this.paymentLinkAffiliateService
             .getRepository()
             .find({
               paymentLinkId: transaction.payment_link_id,
-              affiliateCode: referralCode,
+              affiliateCode: affiliateCode,
             });
 
           if (participations.length > 0) {
             for (const participation of participations) {
-              // Credit the affiliate
+              // Create commission record (history + audit)
+              await this.commissionService.createCommission({
+                affiliateId: participation.affiliateId,
+                paymentId: transaction._id,
+                paymentLinkId: participation.paymentLinkId,
+                tier: participation.tier,
+                amount: participation.commissionAmount,
+              });
+
+              // Credit user earnings (keep for quick dashboard access)
               await this.userService.updateOne(
                 participation.affiliateId.toString(),
                 {

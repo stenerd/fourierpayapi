@@ -6,6 +6,7 @@ import { PaystackService } from 'src/paystack/paystack.service';
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UserService } from 'src/user/user.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { CommissionService } from 'src/commissions/commission.service';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { VerifyPaymentDto } from './dto/verify-payment.dto';
 import { ViewPaymentDto } from './dto/view-payment.dto';
@@ -22,8 +23,9 @@ export declare class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService;
     private readonly configService;
     private readonly userService;
+    private readonly commissionService;
     private readonly paymentLinkAffiliateService;
-    constructor(paymentRepository: PaymentRepository, paystackService: PaystackService, paystackFactory: PaystackFactory, paymentLinkService: PaymentLinkService, transactionService: TransactionService, walletService: WalletService, configService: ConfigService, userService: UserService, paymentLinkAffiliateService: PaymentLinkAffiliateService);
+    constructor(paymentRepository: PaymentRepository, paystackService: PaystackService, paystackFactory: PaystackFactory, paymentLinkService: PaymentLinkService, transactionService: TransactionService, walletService: WalletService, configService: ConfigService, userService: UserService, commissionService: CommissionService, paymentLinkAffiliateService: PaymentLinkAffiliateService);
     newPayment(data: IInitializePayment): Promise<Payment>;
     initializePayment(dto: InitializePaymentDto): Promise<Record<string, any>>;
     verifyPayment(dto: VerifyPaymentDto): Promise<Record<string, any>>;

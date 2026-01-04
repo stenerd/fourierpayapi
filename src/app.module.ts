@@ -28,6 +28,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
 import { WebhookModule } from './webhook/webhook.module';
 import { SchoolModule } from './school/school.module';
+import { CommissionModule } from './commissions/commission.module';
 const config = configuration();
 
 @Module({
@@ -98,6 +99,7 @@ const config = configuration();
     WebhookModule,
     SchoolModule,
     PaymentLinkAffiliateModule,
+    CommissionModule,
   ],
   controllers: [AppController],
   providers: [CloudinaryService],

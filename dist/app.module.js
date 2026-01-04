@@ -36,6 +36,7 @@ const schedule_1 = require("@nestjs/schedule");
 const admin_module_1 = require("./admin/admin.module");
 const webhook_module_1 = require("./webhook/webhook.module");
 const school_module_1 = require("./school/school.module");
+const commission_module_1 = require("./commissions/commission.module");
 const config = (0, configuration_1.default)();
 let AppModule = class AppModule {
 };
@@ -107,6 +108,7 @@ AppModule = __decorate([
             webhook_module_1.WebhookModule,
             school_module_1.SchoolModule,
             payment_link_affiliate_module_1.PaymentLinkAffiliateModule,
+            commission_module_1.CommissionModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [cloudinary_service_1.CloudinaryService],

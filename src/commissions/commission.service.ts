@@ -3,12 +3,16 @@ import { CommissionRepository } from './repositories/commission.repository';
 import { PaymentAffiliateRepository } from 'src/payment-link-affiliate/repositories/payment-link-affiliate.repository';
 import { Types } from 'mongoose';
 import { RoleEnum } from 'src/user/user.enum';
-
+import { IJWTUser } from 'src/auth/auth.interface';
+import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
+import { UserRepository } from 'src/user/user.repository';
 @Injectable()
 export class CommissionService {
   constructor(
     private readonly commissionRepository: CommissionRepository,
     private readonly paymentAffiliateRepository: PaymentAffiliateRepository,
+    private readonly paymentLinkRepository: PaymentLinkRepository,
+    private readonly userRepository: UserRepository,
   ) {}
 
   // Internal — called from PaymentService on successful payment
@@ -27,6 +31,72 @@ export class CommissionService {
       amount: data.amount,
       status: 'PENDING',
     });
+  }
+
+  async getAllAffiliates(currentUser: IJWTUser) {
+    const paymentLinks = await this.paymentLinkRepository.find({
+      creator_id: currentUser._id,
+    });
+
+    const paymentLinkIds = paymentLinks.map((link) => link._id);
+
+    if (paymentLinkIds.length === 0) {
+      return [];
+    }
+
+    const participations = await this.paymentAffiliateRepository.find({
+      paymentLinkId: { $in: paymentLinkIds },
+    });
+
+    if (participations.length === 0) {
+      return [];
+    }
+
+    const commissions = await this.commissionRepository.find({
+      paymentLinkId: { $in: paymentLinkIds },
+    });
+
+    const commissionMap = new Map<string, number>();
+    commissions.forEach((comm) => {
+      const affId = comm.affiliateId.toString();
+      const current = commissionMap.get(affId) || 0;
+      commissionMap.set(affId, current + comm.amount);
+    });
+
+    const affiliateMap = new Map<string, any>();
+
+    for (const participation of participations) {
+      const affId = participation.affiliateId.toString();
+
+      if (!affiliateMap.has(affId)) {
+        const user = await this.userRepository.findOne({
+          _id: participation.affiliateId,
+        });
+
+        affiliateMap.set(affId, {
+          _id: affId,
+          affiliateCode: user?.affiliateCode || 'N/A',
+          name:
+            `${user?.firstname || ''} ${user?.lastname || ''}`.trim() ||
+            'Unknown',
+          email: user?.email || 'N/A',
+          linksJoined: 0,
+          sales: 0,
+          earnings: 0,
+        });
+      }
+
+      const aff = affiliateMap.get(affId);
+      aff.linksJoined += 1;
+      aff.earnings = commissionMap.get(affId) || 0;
+      aff.sales = commissions.filter(
+        (c) => c.affiliateId.toString() === affId,
+      ).length;
+    }
+
+    return Array.from(affiliateMap.values()).sort(
+      (a, b) => b.earnings - a.earnings,
+    );
   }
 
   // 1. Affiliate dashboard — earnings + commission history

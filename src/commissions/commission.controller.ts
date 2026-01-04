@@ -35,6 +35,17 @@ export class CommissionController extends CoreController {
     return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
   }
 
+  // Merchant view: All affiliates with earnings (across all links)
+  @Get('/affiliates')
+  @UseGuards(AuthGuard)
+  async getAllAffiliates(
+    @CurrentUser() currentUser: IJWTUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const data = await this.commissionService.getAllAffiliates(currentUser);
+    return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
+  }
+
   // 2. All commissions for a specific payment link (merchant view)
   @Get('/link/:paymentLinkId')
   async getByPaymentLink(

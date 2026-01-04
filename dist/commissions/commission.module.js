@@ -16,6 +16,7 @@ const commission_controller_1 = require("./commission.controller");
 const payment_link_affiliate_module_1 = require("../payment-link-affiliate/payment-link-affiliate.module");
 const user_module_1 = require("../user/user.module");
 const subscription_module_1 = require("../subscription/subscription.module");
+const payment_link_module_1 = require("../payment-link/payment-link.module");
 let CommissionModule = class CommissionModule {
 };
 CommissionModule = __decorate([
@@ -25,6 +26,7 @@ CommissionModule = __decorate([
                 { name: 'Commission', schema: commission_model_1.CommissionSchema },
             ]),
             (0, common_1.forwardRef)(() => payment_link_affiliate_module_1.PaymentLinkAffiliateModule),
+            payment_link_module_1.PaymentLinkModule,
             user_module_1.UserModule,
             subscription_module_1.SubscriptionModule,
         ],

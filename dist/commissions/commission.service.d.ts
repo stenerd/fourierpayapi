@@ -1,10 +1,15 @@
 import { CommissionRepository } from './repositories/commission.repository';
 import { PaymentAffiliateRepository } from 'src/payment-link-affiliate/repositories/payment-link-affiliate.repository';
 import { Types } from 'mongoose';
+import { IJWTUser } from 'src/auth/auth.interface';
+import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
+import { UserRepository } from 'src/user/user.repository';
 export declare class CommissionService {
     private readonly commissionRepository;
     private readonly paymentAffiliateRepository;
-    constructor(commissionRepository: CommissionRepository, paymentAffiliateRepository: PaymentAffiliateRepository);
+    private readonly paymentLinkRepository;
+    private readonly userRepository;
+    constructor(commissionRepository: CommissionRepository, paymentAffiliateRepository: PaymentAffiliateRepository, paymentLinkRepository: PaymentLinkRepository, userRepository: UserRepository);
     createCommission(data: {
         affiliateId: Types.ObjectId;
         paymentId: Types.ObjectId;
@@ -12,6 +17,7 @@ export declare class CommissionService {
         tier: number;
         amount: number;
     }): Promise<void>;
+    getAllAffiliates(currentUser: IJWTUser): Promise<any[]>;
     getAffiliateDashboard(affiliateId: string): Promise<{
         totalEarnings: number;
         tier1Earnings: number;

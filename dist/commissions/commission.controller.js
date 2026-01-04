@@ -28,6 +28,10 @@ let CommissionController = class CommissionController extends controller_core_1.
         const data = await this.commissionService.getAffiliateDashboard(currentUser._id);
         return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
     }
+    async getAllAffiliates(currentUser, res) {
+        const data = await this.commissionService.getAllAffiliates(currentUser);
+        return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
+    }
     async getByPaymentLink(paymentLinkId, currentUser, res) {
         const data = await this.commissionService.getByPaymentLink(paymentLinkId, currentUser.role === user_enum_1.RoleEnum.SUPERADMIN ? null : currentUser._id);
         return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
@@ -53,6 +57,15 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], CommissionController.prototype, "getAffiliateDashboard", null);
+__decorate([
+    (0, common_1.Get)('/affiliates'),
+    (0, common_1.UseGuards)(auth_guards_1.AuthGuard),
+    __param(0, (0, current_user_decorator_1.CurrentUser)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], CommissionController.prototype, "getAllAffiliates", null);
 __decorate([
     (0, common_1.Get)('/link/:paymentLinkId'),
     __param(0, (0, common_1.Param)('paymentLinkId')),

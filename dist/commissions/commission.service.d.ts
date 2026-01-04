@@ -40,4 +40,24 @@ export declare class CommissionService {
         };
     }>;
     markAsPaid(id: string, currentUser: any): Promise<import("./models/commission.model").CommissionDocument>;
+    getAffiliatesWithEarnings(paymentLinkId: string, merchantId: string): Promise<{
+        _id: string;
+        affiliateCode: string;
+        name: string;
+        email: string;
+        tier: 1 | 2;
+        linksJoined: number;
+        sales: number;
+        earnings: number;
+    }[]>;
+    getAffiliatesForLink(paymentLinkId: string, merchantId: string | null): Promise<{
+        _id: any;
+        affiliateCode: any;
+        name: string;
+        email: any;
+        tier: any;
+        commissionRate: any;
+        sales: number;
+        earnings: number;
+    }[]>;
 }

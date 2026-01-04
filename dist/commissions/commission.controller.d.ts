@@ -11,4 +11,5 @@ export declare class CommissionController extends CoreController {
     getByAffiliate(affiliateId: string, currentUser: IJWTUser, res: Response): Promise<void>;
     getAll(query: any, currentUser: IJWTUser, res: Response): Promise<void>;
     markAsPaid(id: string, currentUser: IJWTUser, res: Response): Promise<void>;
+    getAffiliatesForLink(paymentLinkId: string, currentUser: IJWTUser, res: Response): Promise<void>;
 }

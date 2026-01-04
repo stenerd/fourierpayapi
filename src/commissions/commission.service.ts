@@ -211,4 +211,111 @@ export class CommissionService {
 
     return await this.commissionRepository.updateOne(id, { status: 'PAID' });
   }
+
+  async getAffiliatesWithEarnings(paymentLinkId: string, merchantId: string) {
+    const participations = await this.paymentAffiliateRepository.find({
+      paymentLinkId: new Types.ObjectId(paymentLinkId),
+    });
+
+    // Optional: restrict to merchant's link
+    // Add check if needed
+
+    const affiliateIds = participations.map((p) => p.affiliateId.toString());
+
+    // Get users
+    const users = await this.userRepository.find({
+      _id: { $in: affiliateIds },
+    });
+
+    // Get commissions for earnings
+    const commissions = await this.commissionRepository.find({
+      paymentLinkId: new Types.ObjectId(paymentLinkId),
+    });
+
+    const commissionMap = new Map<string, number>();
+    commissions.forEach((c) => {
+      const id = c.affiliateId.toString();
+      commissionMap.set(id, (commissionMap.get(id) || 0) + c.amount);
+    });
+
+    // Build list
+    return participations.map((part) => {
+      const user = users.find(
+        (u) => u._id.toString() === part.affiliateId.toString(),
+      );
+      const earnings = commissionMap.get(part.affiliateId.toString()) || 0;
+      const sales = commissions.filter(
+        (c) => c.affiliateId.toString() === part.affiliateId.toString(),
+      ).length;
+
+      return {
+        _id: part.affiliateId.toString(),
+        affiliateCode: part.affiliateCode,
+        name:
+          `${user?.firstname || ''} ${user?.lastname || ''}`.trim() ||
+          'Unknown',
+        email: user?.email || 'N/A',
+        tier: part.tier,
+        linksJoined: 1, // since it's per link
+        sales,
+        earnings,
+      };
+    });
+  }
+
+  // Get all affiliates who joined a specific payment link + their earnings
+  // Merchant view: All affiliates who joined a specific payment link + earnings
+  async getAffiliatesForLink(paymentLinkId: string, merchantId: string | null) {
+    const participations = await this.paymentAffiliateRepository.find(
+      { paymentLinkId: new Types.ObjectId(paymentLinkId) },
+      {},
+      {
+        populate: [
+          {
+            path: 'affiliateId',
+            select: 'firstname lastname email affiliateCode',
+          },
+        ],
+        lean: true,
+      },
+    );
+
+    if (participations.length === 0) {
+      return [];
+    }
+
+    const commissions = await this.commissionRepository.find({
+      paymentLinkId: new Types.ObjectId(paymentLinkId),
+    });
+
+    const earningsMap = new Map<string, { sales: number; earnings: number }>();
+    commissions.forEach((c) => {
+      const id = c.affiliateId.toString();
+      const current = earningsMap.get(id) || { sales: 0, earnings: 0 };
+      current.sales += 1;
+      current.earnings += c.amount;
+      earningsMap.set(id, current);
+    });
+
+    const affiliateList = participations.map((part: any) => {
+      const affiliate = part.affiliateId || {};
+      const affId = affiliate._id?.toString() || part.affiliateId.toString();
+      const stats = earningsMap.get(affId) || { sales: 0, earnings: 0 };
+
+      return {
+        _id: affId,
+        affiliateCode: part.affiliateCode,
+        name:
+          `${affiliate.firstname || ''} ${affiliate.lastname || ''}`.trim() ||
+          'Unknown',
+        email: affiliate.email || 'N/A',
+        tier: part.tier,
+        commissionRate: part.commissionAmount,
+        sales: stats.sales,
+        earnings: stats.earnings,
+      };
+    });
+
+    return affiliateList.sort((a, b) => b.earnings - a.earnings);
+  }
 }

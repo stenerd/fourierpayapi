@@ -185,15 +185,9 @@ let CommissionService = class CommissionService {
             };
         });
     }
-    async getAffiliatesForLink(paymentLinkId, merchantId) {
-        const participations = await this.paymentAffiliateRepository.find({ paymentLinkId: new mongoose_1.Types.ObjectId(paymentLinkId) }, {}, {
-            populate: [
-                {
-                    path: 'affiliateId',
-                    select: 'firstname lastname email affiliateCode',
-                },
-            ],
-            lean: true,
+    async getAffiliatesForLink(paymentLinkId) {
+        const participations = await this.paymentAffiliateRepository.find({
+            paymentLinkId: new mongoose_1.Types.ObjectId(paymentLinkId),
         });
         if (participations.length === 0) {
             return [];
@@ -201,32 +195,36 @@ let CommissionService = class CommissionService {
         const commissions = await this.commissionRepository.find({
             paymentLinkId: new mongoose_1.Types.ObjectId(paymentLinkId),
         });
-        const earningsMap = new Map();
-        commissions.forEach((c) => {
-            const id = c.affiliateId.toString();
-            const current = earningsMap.get(id) || { sales: 0, earnings: 0 };
-            current.sales += 1;
-            current.earnings += c.amount;
-            earningsMap.set(id, current);
+        const commissionMap = new Map();
+        commissions.forEach((comm) => {
+            const affId = comm.affiliateId.toString();
+            const current = commissionMap.get(affId) || 0;
+            commissionMap.set(affId, current + comm.amount);
         });
-        const affiliateList = participations.map((part) => {
-            var _a;
-            const affiliate = part.affiliateId || {};
-            const affId = ((_a = affiliate._id) === null || _a === void 0 ? void 0 : _a.toString()) || part.affiliateId.toString();
-            const stats = earningsMap.get(affId) || { sales: 0, earnings: 0 };
-            return {
-                _id: affId,
-                affiliateCode: part.affiliateCode,
-                name: `${affiliate.firstname || ''} ${affiliate.lastname || ''}`.trim() ||
-                    'Unknown',
-                email: affiliate.email || 'N/A',
-                tier: part.tier,
-                commissionRate: part.commissionAmount,
-                sales: stats.sales,
-                earnings: stats.earnings,
-            };
-        });
-        return affiliateList.sort((a, b) => b.earnings - a.earnings);
+        const affiliateMap = new Map();
+        for (const participation of participations) {
+            const affId = participation.affiliateId.toString();
+            if (!affiliateMap.has(affId)) {
+                const user = await this.userRepository.findOne({
+                    _id: participation.affiliateId,
+                });
+                affiliateMap.set(affId, {
+                    _id: affId,
+                    affiliateCode: (user === null || user === void 0 ? void 0 : user.affiliateCode) || 'N/A',
+                    name: `${(user === null || user === void 0 ? void 0 : user.firstname) || ''} ${(user === null || user === void 0 ? void 0 : user.lastname) || ''}`.trim() ||
+                        'Unknown',
+                    email: (user === null || user === void 0 ? void 0 : user.email) || 'N/A',
+                    linksJoined: 0,
+                    sales: 0,
+                    earnings: 0,
+                });
+            }
+            const aff = affiliateMap.get(affId);
+            aff.linksJoined += 1;
+            aff.earnings = commissionMap.get(affId) || 0;
+            aff.sales = commissions.filter((c) => c.affiliateId.toString() === affId).length;
+        }
+        return Array.from(affiliateMap.values()).sort((a, b) => b.earnings - a.earnings);
     }
 };
 CommissionService = __decorate([

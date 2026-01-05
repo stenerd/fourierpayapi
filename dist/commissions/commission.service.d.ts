@@ -50,14 +50,5 @@ export declare class CommissionService {
         sales: number;
         earnings: number;
     }[]>;
-    getAffiliatesForLink(paymentLinkId: string, merchantId: string | null): Promise<{
-        _id: any;
-        affiliateCode: any;
-        name: string;
-        email: any;
-        tier: any;
-        commissionRate: any;
-        sales: number;
-        earnings: number;
-    }[]>;
+    getAffiliatesForLink(paymentLinkId: string): Promise<any[]>;
 }

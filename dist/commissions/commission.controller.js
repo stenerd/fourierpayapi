@@ -49,7 +49,7 @@ let CommissionController = class CommissionController extends controller_core_1.
         return this.responseSuccess(res, '00', 'Commission marked as paid', data, common_1.HttpStatus.OK);
     }
     async getAffiliatesForLink(paymentLinkId, currentUser, res) {
-        const data = await this.commissionService.getAffiliatesForLink(paymentLinkId, currentUser._id);
+        const data = await this.commissionService.getAffiliatesForLink(paymentLinkId);
         return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
     }
 };

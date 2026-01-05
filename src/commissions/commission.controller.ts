@@ -109,7 +109,6 @@ export class CommissionController extends CoreController {
   ) {
     const data = await this.commissionService.getAffiliatesForLink(
       paymentLinkId,
-      currentUser._id,
     );
     return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
   }

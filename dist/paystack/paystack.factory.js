@@ -34,7 +34,7 @@ let PaystackFactory = class PaystackFactory {
                 amount: data.amount,
                 email: user.email,
                 others: data.form,
-                referralCode: referralCode || null,
+                affiliateCode: referralCode || null,
             },
             channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
         };

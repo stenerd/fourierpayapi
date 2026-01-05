@@ -112,9 +112,9 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         return Object.assign(Object.assign({}, generate_paystack_payload), { publicKey: this.configService.get('PAYSTACK_PUBLIC') });
     }
     async verifyPayment(dto) {
+        var _a;
         const result = await this.paystackService.verifyPayment(dto.reference);
         const { metadata, amount, } = result;
-        console.log('amount >> ', amount, dto.reference);
         const transaction = await this.transactionService.findOne({
             reference: dto.reference,
         });
@@ -204,8 +204,8 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                     };
                 }
                 await session.commitTransaction();
-                if (transaction.affiliateCode) {
-                    const affiliateCode = transaction.affiliateCode;
+                const affiliateCode = (_a = result.metadata) === null || _a === void 0 ? void 0 : _a.affiliateCode;
+                if (affiliateCode) {
                     const participations = await this.paymentLinkAffiliateService
                         .getRepository()
                         .find({

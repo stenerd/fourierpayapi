@@ -182,8 +182,6 @@ export class PaymentService extends CoreService<PaymentRepository> {
       // ip_address,
     } = result;
 
-    console.log('amount >> ', amount, dto.reference);
-
     const transaction = await this.transactionService.findOne({
       reference: dto.reference,
     });
@@ -320,11 +318,10 @@ export class PaymentService extends CoreService<PaymentRepository> {
 
         await session.commitTransaction();
 
-        // === AFFILIATE COMMISSION CREDITING ===
-        if (transaction.affiliateCode) {
-          // ← change to affiliateCode (or keep referralCode if that's your field)
-          const affiliateCode = transaction.affiliateCode;
+        const affiliateCode = result.metadata?.affiliateCode;
 
+        // === AFFILIATE COMMISSION CREDITING ===
+        if (affiliateCode) {
           // Find all participation records for this link and affiliate code
           const participations = await this.paymentLinkAffiliateService
             .getRepository()

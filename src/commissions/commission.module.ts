@@ -21,6 +21,6 @@ import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
   ],
   controllers: [CommissionController],
   providers: [CommissionService, CommissionRepository],
-  exports: [CommissionService],
+  exports: [CommissionService, CommissionRepository],
 })
 export class CommissionModule {}

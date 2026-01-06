@@ -32,7 +32,7 @@ CommissionModule = __decorate([
         ],
         controllers: [commission_controller_1.CommissionController],
         providers: [commission_service_1.CommissionService, commission_repository_1.CommissionRepository],
-        exports: [commission_service_1.CommissionService],
+        exports: [commission_service_1.CommissionService, commission_repository_1.CommissionRepository],
     })
 ], CommissionModule);
 exports.CommissionModule = CommissionModule;

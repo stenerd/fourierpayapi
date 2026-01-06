@@ -6,6 +6,8 @@ import { UserRepository } from 'src/user/user.repository';
 import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
 import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { PaymentService } from 'src/payment/payment.service';
+import { CommissionRepository } from 'src/commissions/repositories/commission.repository';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRepository> {
@@ -14,6 +16,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
     private readonly userRepository: UserRepository,
     private readonly paymentLinkRepository: PaymentLinkRepository,
     private readonly paymentService: PaymentService,
+    private readonly commissionRepository: CommissionRepository,
   ) {
     super(paymentAffiliateRepository);
   }
@@ -115,7 +118,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
   }
 
   async getDashboardData(affiliateId: string) {
-    // Get all participations for this affiliate (to know links, tiers, rates)
+    // Get all participations for this affiliate (links joined)
     const participations = await this.paymentAffiliateRepository.find(
       { affiliateId },
       {},
@@ -123,77 +126,85 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
         populate: [
           {
             path: 'paymentLinkId',
-            select: 'name amount link tier1FixedAmount tier2FixedAmount',
+            select: 'name amount link',
           },
         ],
+        lean: true,
       },
     );
 
-    // Get the affiliate's code for querying payments
-    const affiliate = await this.userRepository.findOne({ _id: affiliateId });
-    if (!affiliate || !affiliate.affiliateCode) {
+    if (participations.length === 0) {
       return {
         totalEarnings: 0,
         tier1Earnings: 0,
         tier2Earnings: 0,
         sharedLinksCount: 0,
         sharedLinks: [],
+        recentCommissions: [],
       };
     }
 
-    const affiliateCode = affiliate.affiliateCode;
+    // Get all commissions for this affiliate
+    const commissions = await this.commissionRepository.find(
+      { affiliateId: new Types.ObjectId(affiliateId) },
+      {},
+      {
+        sort: { createdAt: -1 },
+        populate: [{ path: 'paymentLinkId', select: 'name' }],
+        lean: true,
+      },
+    );
 
-    // Find all PAID payments that used this affiliate's code
-    const paidPayments = await this.paymentService.findPayments({
-      affiliateCode,
-      status: TransactionStatus.PAID,
-    });
-
+    // Calculate earnings from actual commissions
     let totalEarnings = 0;
     let tier1Earnings = 0;
     let tier2Earnings = 0;
 
-    const paymentCounts = new Map<string, number>(); // paymentLinkId → count of paid payments
+    commissions.forEach((comm) => {
+      totalEarnings += comm.amount;
+      if (comm.tier === 1) tier1Earnings += comm.amount;
+      if (comm.tier === 2) tier2Earnings += comm.amount;
+    });
 
-    for (const payment of paidPayments) {
-      const participation = participations.find(
-        (p) =>
-          p.paymentLinkId._id.toString() === payment.payment_link_id.toString(),
+    // Group commissions by link for per-link earnings
+    const linkEarningsMap = new Map<string, number>();
+    const linkSalesMap = new Map<string, number>();
+
+    commissions.forEach((comm) => {
+      const linkId = comm.paymentLinkId._id.toString();
+      linkEarningsMap.set(
+        linkId,
+        (linkEarningsMap.get(linkId) || 0) + comm.amount,
       );
-
-      if (!participation) continue;
-
-      const commission = participation.commissionAmount || 0;
-
-      if (participation.tier === 1) {
-        tier1Earnings += commission;
-      } else if (participation.tier === 2) {
-        tier2Earnings += commission;
-      }
-      totalEarnings += commission;
-
-      // Count payments per link
-      const linkId = participation.paymentLinkId._id.toString();
-      paymentCounts.set(linkId, (paymentCounts.get(linkId) || 0) + 1);
-    }
+      linkSalesMap.set(linkId, (linkSalesMap.get(linkId) || 0) + 1);
+    });
 
     // Build shared links list
-    const sharedLinks = participations.map((participation) => {
-      const link = participation.paymentLinkId as any;
+    const sharedLinks = participations.map((part) => {
+      const link = part.paymentLinkId as any;
       const linkId = link._id.toString();
-      const paidCount = paymentCounts.get(linkId) || 0;
+      const earned = linkEarningsMap.get(linkId) || 0;
+      const sales = linkSalesMap.get(linkId) || 0;
 
       return {
-        paymentLinkId: linkId,
+        paymentLinkId: link._id.toString(),
         name: link.name,
         amount: link.amount,
-        shareableLink: `${link.link}?ref=${participation.affiliateCode}`,
-        yourCommissionPerSale: participation.commissionAmount || 0,
-        tier: participation.tier,
-        paidSalesCount: paidCount,
-        earnedFromThisLink: (participation.commissionAmount || 0) * paidCount,
+        shareableLink: `${link.link}?ref=${part.affiliateCode}`,
+        yourCommissionPerSale: part.commissionAmount || 0,
+        tier: part.tier,
+        paidSalesCount: sales,
+        earnedFromThisLink: earned,
       };
     });
+
+    // Recent commissions (latest 10)
+    const recentCommissions = commissions.slice(0, 10).map((comm: any) => ({
+      date: comm.createdAt,
+      linkName: comm.paymentLinkId?.name || 'Unknown',
+      tier: comm.tier,
+      amount: comm.amount,
+    }));
 
     return {
       totalEarnings,
@@ -201,6 +212,7 @@ export class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRep
       tier2Earnings,
       sharedLinksCount: sharedLinks.length,
       sharedLinks,
+      recentCommissions,
     };
   }
 }

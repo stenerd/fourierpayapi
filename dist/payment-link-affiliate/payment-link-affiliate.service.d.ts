@@ -4,12 +4,14 @@ import { CreatePaymentAffiliateDto } from './dto/create-payment-affiliate.dto';
 import { UserRepository } from 'src/user/user.repository';
 import { PaymentLinkRepository } from 'src/payment-link/repositories/payment-link.repository';
 import { PaymentService } from 'src/payment/payment.service';
+import { CommissionRepository } from 'src/commissions/repositories/commission.repository';
 export declare class PaymentLinkAffiliateService extends CoreService<PaymentAffiliateRepository> {
     private readonly paymentAffiliateRepository;
     private readonly userRepository;
     private readonly paymentLinkRepository;
     private readonly paymentService;
-    constructor(paymentAffiliateRepository: PaymentAffiliateRepository, userRepository: UserRepository, paymentLinkRepository: PaymentLinkRepository, paymentService: PaymentService);
+    private readonly commissionRepository;
+    constructor(paymentAffiliateRepository: PaymentAffiliateRepository, userRepository: UserRepository, paymentLinkRepository: PaymentLinkRepository, paymentService: PaymentService, commissionRepository: CommissionRepository);
     createParticipation(dto: CreatePaymentAffiliateDto, user_id: string): Promise<{
         shareableLink: string;
         tier1Commission: number;
@@ -32,6 +34,12 @@ export declare class PaymentLinkAffiliateService extends CoreService<PaymentAffi
             tier: 1 | 2;
             paidSalesCount: number;
             earnedFromThisLink: number;
+        }[];
+        recentCommissions: {
+            date: any;
+            linkName: any;
+            tier: any;
+            amount: any;
         }[];
     }>;
 }

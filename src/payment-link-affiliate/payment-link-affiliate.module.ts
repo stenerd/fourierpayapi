@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { PaymentLinkAffiliateController } from './payment-link-affiliate.controller';
 import { PaymentLinkAffiliateService } from './payment-link-affiliate.service';
@@ -7,6 +7,7 @@ import { PaymentAffiliateSchema } from './models/payment-link-affiliate.model';
 import { UserModule } from 'src/user/user.module';
 import { PaymentLinkModule } from 'src/payment-link/payment-link.module';
 import { PaymentModule } from 'src/payment/payment.module';
+import { CommissionModule } from 'src/commissions/commission.module';
 
 @Module({
   imports: [
@@ -14,8 +15,9 @@ import { PaymentModule } from 'src/payment/payment.module';
       { name: 'PaymentAffiliate', schema: PaymentAffiliateSchema },
     ]),
     UserModule,
-    PaymentModule,
     PaymentLinkModule,
+    PaymentModule,
+    forwardRef(() => CommissionModule),
   ],
   controllers: [PaymentLinkAffiliateController],
   providers: [PaymentLinkAffiliateService, PaymentAffiliateRepository],

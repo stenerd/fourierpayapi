@@ -112,4 +112,12 @@ export class CommissionController extends CoreController {
     );
     return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
   }
+
+  // Get all commissions (for debugging / admin view)
+  @Get('/all')
+  @UseGuards(AuthGuard)
+  async getAllCommissions(@Res({ passthrough: true }) res: Response) {
+    const data = await this.commissionService.getAllCommissions();
+    return this.responseSuccess(res, '00', 'Success', data, HttpStatus.OK);
+  }
 }

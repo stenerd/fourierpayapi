@@ -320,6 +320,8 @@ export class PaymentService extends CoreService<PaymentRepository> {
 
         const affiliateCode = result.metadata?.affiliateCode;
 
+        console.log('AFFILLIATE CODE : ', affiliateCode);
+
         // === AFFILIATE COMMISSION CREDITING ===
         if (affiliateCode) {
           // Find all participation records for this link and affiliate code
@@ -329,6 +331,8 @@ export class PaymentService extends CoreService<PaymentRepository> {
               paymentLinkId: transaction.payment_link_id,
               affiliateCode: affiliateCode,
             });
+
+          console.log('Participations', participations);
 
           if (participations.length > 0) {
             for (const participation of participations) {

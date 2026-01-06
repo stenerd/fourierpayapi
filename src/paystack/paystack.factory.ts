@@ -17,14 +17,7 @@ export class PaystackFactory {
     entity: TransactionEntity,
   ): IInitializePaystack {
     const user: Record<string, any> = payment_link.creator_id;
-
-    let referralCode: string | null = null;
-    try {
-      const url = new URL(payment_link.link);
-      referralCode = url.searchParams.get('ref');
-    } catch (e) {
-      // Invalid URL — ignore
-    }
+    const affiliateCode = data.affiliateCode || null;
 
     const payload: IInitializePaystack = {
       reciever_id: user._id.toString(),
@@ -42,7 +35,7 @@ export class PaystackFactory {
         amount: data.amount,
         email: user.email,
         others: data.form,
-        affiliateCode: referralCode || null,
+        affiliateCode: affiliateCode || null,
       },
       channels: ['card', 'bank', 'ussd', 'qr', 'mobile_money', 'bank_transfer'],
     };

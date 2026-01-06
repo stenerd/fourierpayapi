@@ -318,4 +318,23 @@ export class CommissionService {
       (a, b) => b.earnings - a.earnings,
     );
   }
+
+  async getAllCommissions() {
+    return await this.commissionRepository.find(
+      {},
+      {},
+      {
+        sort: { createdAt: -1 },
+        populate: [
+          {
+            path: 'affiliateId',
+            select: 'firstname lastname email affiliateCode',
+          },
+          { path: 'paymentLinkId', select: 'name' },
+          { path: 'paymentId', select: 'reference' },
+        ],
+        lean: true,
+      },
+    );
+  }
 }

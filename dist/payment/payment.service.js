@@ -205,6 +205,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                 }
                 await session.commitTransaction();
                 const affiliateCode = (_a = result.metadata) === null || _a === void 0 ? void 0 : _a.affiliateCode;
+                console.log('AFFILLIATE CODE : ', affiliateCode);
                 if (affiliateCode) {
                     const participations = await this.paymentLinkAffiliateService
                         .getRepository()
@@ -212,6 +213,7 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                         paymentLinkId: transaction.payment_link_id,
                         affiliateCode: affiliateCode,
                     });
+                    console.log('Participations', participations);
                     if (participations.length > 0) {
                         for (const participation of participations) {
                             await this.commissionService.createCommission({

@@ -226,6 +226,20 @@ let CommissionService = class CommissionService {
         }
         return Array.from(affiliateMap.values()).sort((a, b) => b.earnings - a.earnings);
     }
+    async getAllCommissions() {
+        return await this.commissionRepository.find({}, {}, {
+            sort: { createdAt: -1 },
+            populate: [
+                {
+                    path: 'affiliateId',
+                    select: 'firstname lastname email affiliateCode',
+                },
+                { path: 'paymentLinkId', select: 'name' },
+                { path: 'paymentId', select: 'reference' },
+            ],
+            lean: true,
+        });
+    }
 };
 CommissionService = __decorate([
     (0, common_1.Injectable)(),

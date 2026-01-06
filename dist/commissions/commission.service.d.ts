@@ -51,4 +51,5 @@ export declare class CommissionService {
         earnings: number;
     }[]>;
     getAffiliatesForLink(paymentLinkId: string): Promise<any[]>;
+    getAllCommissions(): Promise<import("./models/commission.model").CommissionDocument[]>;
 }

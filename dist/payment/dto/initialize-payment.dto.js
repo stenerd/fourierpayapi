@@ -50,5 +50,16 @@ __decorate([
     (0, class_transformer_1.Type)(() => FormAnswerDto),
     __metadata("design:type", Array)
 ], InitializePaymentDto.prototype, "form", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        type: String,
+        description: 'Affiliate code from referral link (optional)',
+        required: false,
+        example: '9C77A27B',
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], InitializePaymentDto.prototype, "affiliateCode", void 0);
 exports.InitializePaymentDto = InitializePaymentDto;
 //# sourceMappingURL=initialize-payment.dto.js.map

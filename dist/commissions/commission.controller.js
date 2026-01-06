@@ -52,6 +52,10 @@ let CommissionController = class CommissionController extends controller_core_1.
         const data = await this.commissionService.getAffiliatesForLink(paymentLinkId);
         return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
     }
+    async getAllCommissions(res) {
+        const data = await this.commissionService.getAllCommissions();
+        return this.responseSuccess(res, '00', 'Success', data, common_1.HttpStatus.OK);
+    }
 };
 __decorate([
     (0, common_1.Get)('/dashboard'),
@@ -116,6 +120,14 @@ __decorate([
     __metadata("design:paramtypes", [String, Object, Object]),
     __metadata("design:returntype", Promise)
 ], CommissionController.prototype, "getAffiliatesForLink", null);
+__decorate([
+    (0, common_1.Get)('/all'),
+    (0, common_1.UseGuards)(auth_guards_1.AuthGuard),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], CommissionController.prototype, "getAllCommissions", null);
 CommissionController = __decorate([
     (0, common_1.Controller)('commission'),
     (0, common_1.UseGuards)(auth_guards_1.AuthGuard),

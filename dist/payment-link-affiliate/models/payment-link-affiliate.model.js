@@ -39,7 +39,7 @@ PaymentAffiliate = __decorate([
 ], PaymentAffiliate);
 exports.PaymentAffiliate = PaymentAffiliate;
 exports.PaymentAffiliateSchema = mongoose_1.SchemaFactory.createForClass(PaymentAffiliate);
-exports.PaymentAffiliateSchema.index({ paymentLinkId: 1, affiliateCode: 1 }, { unique: true });
+exports.PaymentAffiliateSchema.index({ paymentLinkId: 1, affiliateCode: 1, tier: 1 }, { unique: true });
 exports.PaymentAffiliateSchema.index({ affiliateId: 1 });
 exports.PaymentAffiliateSchema.index({ paymentLinkId: 1 });
 //# sourceMappingURL=payment-link-affiliate.model.js.map

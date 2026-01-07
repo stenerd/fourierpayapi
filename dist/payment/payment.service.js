@@ -482,7 +482,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
         const payment_link = await this.paymentLinkService.findOne({
             _id: transaction.payment_link_id,
         });
-        console.log('payment_link >> ', payment_link);
         return { transaction, payment_link };
     }
     async findPayments(query) {

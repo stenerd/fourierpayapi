@@ -30,7 +30,7 @@ export const PaymentAffiliateSchema =
 
 // Critical indexes for performance
 PaymentAffiliateSchema.index(
-  { paymentLinkId: 1, affiliateCode: 1 },
+  { paymentLinkId: 1, affiliateCode: 1, tier: 1 },
   { unique: true },
 );
 PaymentAffiliateSchema.index({ affiliateId: 1 });

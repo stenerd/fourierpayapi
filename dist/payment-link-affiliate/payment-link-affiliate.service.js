@@ -29,36 +29,74 @@ let PaymentLinkAffiliateService = class PaymentLinkAffiliateService extends serv
     }
     async createParticipation(dto, user_id) {
         const paymentLink = await this.paymentLinkRepository.findOne({
-            _id: dto.paymentLinkId,
+            code: dto.paymentLinkId,
             affiliateEnabled: true,
         });
+        console.log('dto.parentAffiliateCode:', dto.parentAffiliateCode);
+        console.log('Current user_id:', user_id);
         if (!paymentLink) {
-            throw new common_1.BadRequestException('Payment link not found or affiliate program not enabled');
         }
         const affiliate = await this.userRepository.findOne({ _id: user_id });
         if (!affiliate || !affiliate.affiliateCode) {
             throw new common_1.BadRequestException('Invalid affiliate');
         }
-        const tier1Record = await this.paymentAffiliateRepository.create({
-            affiliateId: affiliate._id,
-            paymentLinkId: paymentLink._id,
-            affiliateCode: affiliate.affiliateCode,
-            tier: 1,
-            commissionAmount: paymentLink.tier1FixedAmount || 0,
-        });
+        try {
+            await this.paymentAffiliateRepository.create({
+                affiliateId: affiliate._id,
+                paymentLinkId: paymentLink._id,
+                affiliateCode: affiliate.affiliateCode,
+                tier: 1,
+                commissionAmount: paymentLink.tier1FixedAmount || 0,
+            });
+        }
+        catch (error) {
+            if (error.code === 11000) {
+                throw new common_1.BadRequestException('You have already joined this payment link. Visit your dashboard to see your shared links.');
+            }
+            throw error;
+        }
         let tier2Record = null;
         if (dto.parentAffiliateCode) {
             const parentAffiliate = await this.userRepository.findOne({
                 affiliateCode: dto.parentAffiliateCode,
             });
+            console.log('Found parentAffiliate:', parentAffiliate ? parentAffiliate._id : 'NOT FOUND');
+            console.log('Creating Tier 2 record with payload:', {
+                affiliateId: parentAffiliate._id.toString(),
+                paymentLinkId: paymentLink._id.toString(),
+                affiliateCode: affiliate.affiliateCode,
+                tier: 2,
+                commissionAmount: paymentLink.tier2FixedAmount || 0,
+            });
+            const searchPayload = {
+                affiliateId: parentAffiliate._id,
+                paymentLinkId: paymentLink._id,
+                affiliateCode: affiliate.affiliateCode,
+                tier: 2,
+            };
+            console.log('Searching for existing Tier 2 record with:', searchPayload);
+            const existingTier2 = await this.paymentAffiliateRepository.findOne(searchPayload);
+            console.log('Existing Tier 2 record result:', existingTier2 ? existingTier2._id.toString() : 'NOT FOUND');
             if (parentAffiliate && parentAffiliate._id.toString() !== user_id) {
-                tier2Record = await this.paymentAffiliateRepository.create({
-                    affiliateId: parentAffiliate._id,
-                    paymentLinkId: paymentLink._id,
-                    affiliateCode: parentAffiliate.affiliateCode,
-                    tier: 2,
-                    commissionAmount: paymentLink.tier2FixedAmount || 0,
-                });
+                try {
+                    tier2Record = await this.paymentAffiliateRepository.create({
+                        affiliateId: parentAffiliate._id,
+                        paymentLinkId: paymentLink._id,
+                        affiliateCode: affiliate.affiliateCode,
+                        tier: 2,
+                        commissionAmount: paymentLink.tier2FixedAmount || 0,
+                    });
+                }
+                catch (error) {
+                    if (error.code === 11000) {
+                        console.log('Tier 2 participation already exists — skipped creation', error);
+                    }
+                    else {
+                        console.error('Error creating Tier 2 participation:', error);
+                        throw error;
+                    }
+                }
+                console.log('Tier 2 record created:', tier2Record ? tier2Record._id : 'SKIPPED (duplicate or error)');
             }
         }
         return {

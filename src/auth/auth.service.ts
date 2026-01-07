@@ -132,7 +132,7 @@ export class AuthService {
 
     const existingEmail = await this.userService.findOne({ email: dto.email });
     if (existingEmail)
-      throw new BadRequestException('Email already registered');
+        throw new NotFoundException('Email already registered');
 
     // Use the exact same create method as normal registration
     const user = await this.userService.create({

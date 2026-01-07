@@ -332,7 +332,6 @@ export class PaymentService extends CoreService<PaymentRepository> {
               affiliateCode: affiliateCode,
             });
 
-          console.log('Participations', participations);
 
           if (participations.length > 0) {
             for (const participation of participations) {
@@ -697,8 +696,6 @@ export class PaymentService extends CoreService<PaymentRepository> {
     const payment_link = await this.paymentLinkService.findOne({
       _id: transaction.payment_link_id,
     });
-
-    console.log('payment_link >> ', payment_link);
 
     return { transaction, payment_link };
   }

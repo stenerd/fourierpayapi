@@ -91,7 +91,7 @@ let AuthService = class AuthService {
             throw new common_1.BadRequestException('Phone number already registered');
         const existingEmail = await this.userService.findOne({ email: dto.email });
         if (existingEmail)
-            throw new common_1.BadRequestException('Email already registered');
+            throw new common_1.NotFoundException('Email already registered');
         const user = await this.userService.create({
             firstname: dto.firstname,
             lastname: dto.lastname,

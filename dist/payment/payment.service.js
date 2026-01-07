@@ -213,7 +213,6 @@ let PaymentService = class PaymentService extends service_core_1.CoreService {
                         paymentLinkId: transaction.payment_link_id,
                         affiliateCode: affiliateCode,
                     });
-                    console.log('Participations', participations);
                     if (participations.length > 0) {
                         for (const participation of participations) {
                             await this.commissionService.createCommission({

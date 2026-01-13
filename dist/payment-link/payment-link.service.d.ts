@@ -33,6 +33,7 @@ import { PaymentLinkFactory } from './payment-link.factory';
 import { PaymentLinkRepository } from './repositories/payment-link.repository';
 import { PayerSheetRepository } from './repositories/payer_sheet.repository';
 import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
+import { AffiliateSettingsDto } from './dto/affiliate-settings.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { PaymentLink } from './models/payment-link.model';
 import { QRCodeService } from 'src/qrcode/qrcode.service';
@@ -53,6 +54,7 @@ export declare class PaymentLinkService extends CoreService<PaymentLinkRepositor
     changePaymentLinkToPublicState(code: string, user_id: string): Promise<any>;
     activatePublicLink(code: string, user_id: string): Promise<any>;
     changePaymentLinkToPrivateState(file: any, code: string, user_id: string, buffer: Buffer): Promise<any>;
+    updateAffiliateSettings(code: string, dto: AffiliateSettingsDto, user_id: string): Promise<import("./models/payment-link.model").PaymentLinkDocument>;
     getPayerData(payment_link_id: string, unique_answer: string): Promise<import("./models/payer-sheet.model").PayerSheetDocument>;
     updatePayerInfo(query: Record<string, any>, data: Record<string, any>): Promise<import("./models/payer-sheet.model").PayerSheetDocument>;
     getPaymentLink(user_id?: string): Promise<import("./models/payment-link.model").PaymentLinkDocument[]>;

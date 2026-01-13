@@ -143,6 +143,26 @@ let PaymentLinkService = class PaymentLinkService extends service_core_1.CoreSer
             },
         })));
     }
+    async updateAffiliateSettings(code, dto, user_id) {
+        const paymentLink = await this.paymentLinkRepository.findOne({
+            code,
+            creator_id: user_id,
+        });
+        if (!paymentLink) {
+            throw new common_1.BadRequestException('Payment link not found or you do not own it');
+        }
+        const updateData = {
+            affiliateEnabled: dto.affiliateEnabled,
+        };
+        if (dto.tier1FixedAmount !== undefined) {
+            updateData.tier1FixedAmount = dto.tier1FixedAmount;
+        }
+        if (dto.tier2FixedAmount !== undefined) {
+            updateData.tier2FixedAmount = dto.tier2FixedAmount;
+        }
+        await this.updateOne(paymentLink._id, updateData);
+        return await this.paymentLinkRepository.findOne({ _id: paymentLink._id });
+    }
     async getPayerData(payment_link_id, unique_answer) {
         const resp = await this.payerSheetRepository.findOne({
             payment_link_id,

@@ -6,4 +6,5 @@ export declare class InitializePaymentDto {
     payment_link_id: string;
     amount: number;
     form: FormAnswerDto[];
+    affiliateCode?: string;
 }

@@ -22,6 +22,7 @@ const current_user_decorator_1 = require("../common/decorators/current-user.deco
 const user_enum_1 = require("../user/user.enum");
 const platform_express_1 = require("@nestjs/platform-express");
 const view_payment_dto_1 = require("../payment/dto/view-payment.dto");
+const affiliate_settings_dto_1 = require("./dto/affiliate-settings.dto");
 let PaymentLinkController = class PaymentLinkController extends controller_core_1.CoreController {
     constructor(paymentLinkService) {
         super();
@@ -58,6 +59,10 @@ let PaymentLinkController = class PaymentLinkController extends controller_core_
     async singlePaymentLink(res, code) {
         const resp = await this.paymentLinkService.singlePaymentLink(code);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.OK);
+    }
+    async updateAffiliateSettings(code, dto, currentUser, res) {
+        const updatedLink = await this.paymentLinkService.updateAffiliateSettings(code, dto, currentUser._id);
+        return this.responseSuccess(res, '00', 'Affiliate settings updated successfully', updatedLink, common_1.HttpStatus.OK);
     }
 };
 __decorate([
@@ -141,6 +146,17 @@ __decorate([
     __metadata("design:paramtypes", [Object, String]),
     __metadata("design:returntype", Promise)
 ], PaymentLinkController.prototype, "singlePaymentLink", null);
+__decorate([
+    (0, common_1.Put)('/:code/affiliate-settings'),
+    (0, common_1.UseGuards)(auth_guards_1.AuthGuard),
+    __param(0, (0, common_1.Param)('code')),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, current_user_decorator_1.CurrentUser)()),
+    __param(3, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, affiliate_settings_dto_1.AffiliateSettingsDto, Object, Object]),
+    __metadata("design:returntype", Promise)
+], PaymentLinkController.prototype, "updateAffiliateSettings", null);
 PaymentLinkController = __decorate([
     (0, common_1.Controller)('payment-link'),
     __metadata("design:paramtypes", [payment_link_service_1.PaymentLinkService])

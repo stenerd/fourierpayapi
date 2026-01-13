@@ -17,6 +17,7 @@ import { PaymentLinkFactory } from './payment-link.factory';
 import { PaymentLinkRepository } from './repositories/payment-link.repository';
 import { PayerSheetRepository } from './repositories/payer_sheet.repository';
 import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
+import { AffiliateSettingsDto } from './dto/affiliate-settings.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { TransactionStatus } from 'src/transaction/transaction.enum';
 import { PaymentLink } from './models/payment-link.model';
@@ -195,6 +196,42 @@ export class PaymentLinkService extends CoreService<PaymentLinkRepository> {
         },
       }),
     });
+  }
+
+  async updateAffiliateSettings(
+    code: string,
+    dto: AffiliateSettingsDto,
+    user_id: string,
+  ) {
+    const paymentLink = await this.paymentLinkRepository.findOne({
+      code,
+      creator_id: user_id,
+    });
+
+    if (!paymentLink) {
+      throw new BadRequestException(
+        'Payment link not found or you do not own it',
+      );
+    }
+
+    // Prepare update object with only changed fields
+    const updateData: any = {
+      affiliateEnabled: dto.affiliateEnabled,
+    };
+
+    if (dto.tier1FixedAmount !== undefined) {
+      updateData.tier1FixedAmount = dto.tier1FixedAmount;
+    }
+
+    if (dto.tier2FixedAmount !== undefined) {
+      updateData.tier2FixedAmount = dto.tier2FixedAmount;
+    }
+
+    // Use updateOne — your existing pattern
+    await this.updateOne(paymentLink._id, updateData);
+
+    // Return fresh data
+    return await this.paymentLinkRepository.findOne({ _id: paymentLink._id });
   }
 
   async getPayerData(payment_link_id: string, unique_answer: string) {

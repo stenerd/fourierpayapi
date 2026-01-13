@@ -4,6 +4,7 @@ import { CoreController } from 'src/common/core/controller.core';
 import { Response } from 'express';
 import { IJWTUser } from 'src/auth/auth.interface';
 import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
+import { AffiliateSettingsDto } from './dto/affiliate-settings.dto';
 export declare class PaymentLinkController extends CoreController {
     private readonly paymentLinkService;
     constructor(paymentLinkService: PaymentLinkService);
@@ -15,4 +16,5 @@ export declare class PaymentLinkController extends CoreController {
     activatePublicLink(currentUser: IJWTUser, code: string, res: Response): Promise<void>;
     getPaymentLink(currentUser: IJWTUser, res: Response): Promise<void>;
     singlePaymentLink(res: Response, code: string): Promise<void>;
+    updateAffiliateSettings(code: string, dto: AffiliateSettingsDto, currentUser: IJWTUser, res: Response): Promise<void>;
 }

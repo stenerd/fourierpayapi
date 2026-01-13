@@ -21,6 +21,7 @@ const user_service_1 = require("../user/user.service");
 const auth_service_1 = require("./auth.service");
 const create_auth_dto_1 = require("./dto/create-auth.dto");
 const login_dto_1 = require("./dto/login.dto");
+const affiliate_auth_dto_1 = require("./dto/affiliate-auth.dto");
 const user_enum_1 = require("../user/user.enum");
 let AuthController = class AuthController extends controller_core_1.CoreController {
     constructor(authService, userService, linkService) {
@@ -38,6 +39,14 @@ let AuthController = class AuthController extends controller_core_1.CoreControll
         const resp = await this.authService.login(loginDto);
         return this.responseSuccess(res, '00', 'Success', resp, common_1.HttpStatus.CREATED);
     }
+    async affiliateRegistration(dto, res) {
+        const result = await this.authService.affiliateRegister(dto);
+        return this.responseSuccess(res, '00', 'Affiliate registration successful', result, common_1.HttpStatus.CREATED);
+    }
+    async affiliateLogin(dto, res) {
+        const result = await this.authService.affiliateLogin(dto);
+        return this.responseSuccess(res, '00', 'Login successful', result, common_1.HttpStatus.OK);
+    }
     async confirmEmail(token, res) {
         const user = await this.userService.confirmEmail(token);
         return this.responseSuccess(res, '00', 'Success', user, common_1.HttpStatus.OK);
@@ -47,7 +56,7 @@ let AuthController = class AuthController extends controller_core_1.CoreControll
         return this.responseSuccess(res, '00', 'Success', result, common_1.HttpStatus.OK);
     }
     async resetPassword(token, resetPasswordDto, res) {
-        const user = await this.userService.resetPassword(token, Object.assign({}, resetPasswordDto));
+        const user = await this.userService.resetPassword(token, resetPasswordDto);
         return this.responseSuccess(res, '00', 'Success', user, common_1.HttpStatus.OK);
     }
 };
@@ -67,6 +76,22 @@ __decorate([
     __metadata("design:paramtypes", [login_dto_1.LoginDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
+__decorate([
+    (0, common_1.Post)('/affiliate-registration'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [affiliate_auth_dto_1.AffiliateRegisterDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "affiliateRegistration", null);
+__decorate([
+    (0, common_1.Post)('/affiliate-login'),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [affiliate_auth_dto_1.AffiliateLoginDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "affiliateLogin", null);
 __decorate([
     (0, common_1.Get)('/confirm-email/:token'),
     __param(0, (0, common_1.Param)('token')),
@@ -89,7 +114,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, create_auth_dto_1.ResetPasswordDto, Object]),
+    __metadata("design:paramtypes", [String, create_auth_dto_1.ResetPasswordDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resetPassword", null);
 AuthController = __decorate([

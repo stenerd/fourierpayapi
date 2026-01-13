@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CoreService } from 'src/common/core/service.core';
 import {
@@ -16,6 +21,7 @@ import {
 import { TransactionService } from 'src/transaction/transaction.service';
 import { UserService } from 'src/user/user.service';
 import { WalletService } from 'src/wallet/wallet.service';
+import { CommissionService } from 'src/commissions/commission.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { InitializePaymentDto } from './dto/initialize-payment.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
@@ -24,6 +30,7 @@ import { ViewPaymentDto } from './dto/view-payment.dto';
 import { IInitializePayment } from './payment.interface';
 import { Payment } from './payment.model';
 import { PaymentRepository } from './payment.repository';
+import { PaymentLinkAffiliateService } from 'src/payment-link-affiliate/payment-link-affiliate.service';
 
 @Injectable()
 export class PaymentService extends CoreService<PaymentRepository> {
@@ -36,6 +43,9 @@ export class PaymentService extends CoreService<PaymentRepository> {
     private readonly walletService: WalletService,
     private readonly configService: ConfigService,
     private readonly userService: UserService,
+    private readonly commissionService: CommissionService,
+    @Inject(forwardRef(() => PaymentLinkAffiliateService)) // ✅ Add this
+    private readonly paymentLinkAffiliateService: PaymentLinkAffiliateService,
   ) {
     super(paymentRepository);
   }
@@ -172,8 +182,6 @@ export class PaymentService extends CoreService<PaymentRepository> {
       // ip_address,
     } = result;
 
-    console.log('amount >> ', amount, dto.reference);
-
     const transaction = await this.transactionService.findOne({
       reference: dto.reference,
     });
@@ -309,6 +317,44 @@ export class PaymentService extends CoreService<PaymentRepository> {
         }
 
         await session.commitTransaction();
+
+        const affiliateCode = result.metadata?.affiliateCode;
+
+        console.log('AFFILLIATE CODE : ', affiliateCode);
+
+        // === AFFILIATE COMMISSION CREDITING ===
+        if (affiliateCode) {
+          // Find all participation records for this link and affiliate code
+          const participations = await this.paymentLinkAffiliateService
+            .getRepository()
+            .find({
+              paymentLinkId: transaction.payment_link_id,
+              affiliateCode: affiliateCode,
+            });
+
+
+          if (participations.length > 0) {
+            for (const participation of participations) {
+              // Create commission record (history + audit)
+              await this.commissionService.createCommission({
+                affiliateId: participation.affiliateId,
+                paymentId: transaction._id,
+                paymentLinkId: participation.paymentLinkId,
+                tier: participation.tier,
+                amount: participation.commissionAmount,
+              });
+
+              // Credit user earnings (keep for quick dashboard access)
+              await this.userService.updateOne(
+                participation.affiliateId.toString(),
+                {
+                  $inc: { affiliateEarnings: participation.commissionAmount },
+                },
+              );
+            }
+          }
+        }
+        // === END AFFILIATE CREDITING ===
       } catch (error) {
         await session.abortTransaction();
         throw new BadRequestException('Something went wrong!');
@@ -651,8 +697,10 @@ export class PaymentService extends CoreService<PaymentRepository> {
       _id: transaction.payment_link_id,
     });
 
-    console.log('payment_link >> ', payment_link);
-
     return { transaction, payment_link };
+  }
+
+  async findPayments(query: any) {
+    return this.paymentRepository.find(query);
   }
 }

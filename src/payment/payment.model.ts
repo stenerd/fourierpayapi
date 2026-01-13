@@ -82,6 +82,9 @@ export class Payment {
     default: TransactionStatus.PENDING,
   })
   status?: TransactionStatus;
+
+  @Prop({ type: String })
+  affiliateCode?: string;
 }
 
 export const PaymentSchema = SchemaFactory.createForClass(Payment);

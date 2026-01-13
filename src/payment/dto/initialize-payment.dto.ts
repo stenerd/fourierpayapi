@@ -47,4 +47,14 @@ export class InitializePaymentDto {
   @ArrayMinSize(0)
   @Type(() => FormAnswerDto)
   form: FormAnswerDto[];
+
+  @ApiProperty({
+    type: String,
+    description: 'Affiliate code from referral link (optional)',
+    required: false,
+    example: '9C77A27B',
+  })
+  @IsOptional()
+  @IsString()
+  affiliateCode?: string;
 }

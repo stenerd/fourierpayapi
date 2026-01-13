@@ -10,6 +10,7 @@ var RoleEnum;
     RoleEnum["UNIVERSITY"] = "University";
     RoleEnum["SMEs"] = "SMEs";
     RoleEnum["OTHERS"] = "Others";
+    RoleEnum["AFFILIATE"] = "Affiliate";
 })(RoleEnum = exports.RoleEnum || (exports.RoleEnum = {}));
 var UserStatusEnum;
 (function (UserStatusEnum) {

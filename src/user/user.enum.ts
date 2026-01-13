@@ -6,6 +6,7 @@ export enum RoleEnum {
   UNIVERSITY = 'University',
   SMEs = 'SMEs',
   OTHERS = 'Others',
+  AFFILIATE = 'Affiliate',
 }
 
 export enum UserStatusEnum {

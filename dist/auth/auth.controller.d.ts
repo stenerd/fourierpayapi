@@ -6,6 +6,7 @@ import { UserService } from 'src/user/user.service';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto, ResetPasswordDto } from './dto/create-auth.dto';
 import { LoginDto } from './dto/login.dto';
+import { AffiliateRegisterDto, AffiliateLoginDto } from './dto/affiliate-auth.dto';
 export declare class AuthController extends CoreController {
     private readonly authService;
     private readonly userService;
@@ -13,7 +14,9 @@ export declare class AuthController extends CoreController {
     constructor(authService: AuthService, userService: UserService, linkService: LinkService);
     registration(createUserDto: CreateUserDto, res: Response): Promise<void>;
     login(loginDto: LoginDto, res: Response): Promise<void>;
+    affiliateRegistration(dto: AffiliateRegisterDto, res: Response): Promise<void>;
+    affiliateLogin(dto: AffiliateLoginDto, res: Response): Promise<void>;
     confirmEmail(token: string, res: Response): Promise<void>;
     forgotPassword(dto: ForgotPasswordDto, res: Response): Promise<void>;
-    resetPassword(token: any, resetPasswordDto: ResetPasswordDto, res: Response): Promise<void>;
+    resetPassword(token: string, resetPasswordDto: ResetPasswordDto, res: Response): Promise<void>;
 }

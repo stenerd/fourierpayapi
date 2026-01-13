@@ -111,6 +111,10 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], Payment.prototype, "status", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String }),
+    __metadata("design:type", String)
+], Payment.prototype, "affiliateCode", void 0);
 Payment = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Payment);

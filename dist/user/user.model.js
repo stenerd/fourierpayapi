@@ -58,6 +58,14 @@ __decorate([
     }),
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ unique: true, sparse: true }),
+    __metadata("design:type", String)
+], User.prototype, "affiliateCode", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Number, default: 0 }),
+    __metadata("design:type", Number)
+], User.prototype, "affiliateEarnings", void 0);
 User = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], User);

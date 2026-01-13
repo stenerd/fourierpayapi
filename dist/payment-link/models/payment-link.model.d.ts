@@ -36,6 +36,7 @@ export declare class SheetUrl {
     publicId: string;
     secureUrl: string;
 }
+export declare const SheetUrlSchema: import("mongoose").Schema<SheetUrl, import("mongoose").Model<SheetUrl, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, SheetUrl>;
 export declare class PaymentLink {
     _id?: any;
     link_id: Types.ObjectId;
@@ -60,5 +61,8 @@ export declare class PaymentLink {
     activate_public_link: boolean;
     sheetUrl: SheetUrl[];
     form?: Form[];
+    affiliateEnabled: boolean;
+    tier1FixedAmount?: number;
+    tier2FixedAmount?: number;
 }
 export declare const PaymentLinkSchema: import("mongoose").Schema<PaymentLink, import("mongoose").Model<PaymentLink, any, any, any, any>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, PaymentLink>;

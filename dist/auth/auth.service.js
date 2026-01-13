@@ -17,6 +17,7 @@ const jwt_1 = require("@nestjs/jwt");
 const email_service_1 = require("../email.service");
 const mailer_1 = require("@nestjs-modules/mailer");
 const user_enum_1 = require("../user/user.enum");
+const crypto_1 = require("crypto");
 let AuthService = class AuthService {
     constructor(userService, jwtService, mailerService, emailService) {
         this.userService = userService;
@@ -33,10 +34,16 @@ let AuthService = class AuthService {
     }
     async createTokens(userObj) {
         const [accessToken, refreshToken] = await Promise.all([
-            this.jwtService.signAsync(userObj, { expiresIn: 60 * 60 * 7 }),
             this.jwtService.signAsync({
-                userId: userObj._id.toString(),
-                email: userObj.email,
+                _id: userObj._id,
+                email: userObj.email || null,
+                role: userObj.role,
+                firstname: userObj.firstname,
+                lastname: userObj.lastname,
+            }, { expiresIn: 60 * 60 * 7 }),
+            this.jwtService.signAsync({
+                userId: userObj._id,
+                email: userObj.email || null,
                 role: userObj.role,
             }, { expiresIn: 60 * 60 * 24 * 7 }),
         ]);
@@ -75,6 +82,83 @@ let AuthService = class AuthService {
             token: resp.token,
         });
         return resp;
+    }
+    async affiliateRegister(dto) {
+        const existingPhone = await this.userService.findOne({
+            phonenumber: dto.phonenumber,
+        });
+        if (existingPhone)
+            throw new common_1.BadRequestException('Phone number already registered');
+        const existingEmail = await this.userService.findOne({ email: dto.email });
+        if (existingEmail)
+            throw new common_1.NotFoundException('Email already registered');
+        const user = await this.userService.create({
+            firstname: dto.firstname,
+            lastname: dto.lastname,
+            email: dto.email,
+            phonenumber: dto.phonenumber,
+            password: dto.password,
+            role: user_enum_1.RoleEnum.AFFILIATE,
+        });
+        let affiliateCode;
+        do {
+            affiliateCode = (0, crypto_1.randomBytes)(4).toString('hex').toUpperCase();
+        } while (await this.userService.findOne({ affiliateCode }));
+        await this.userService.updateOne(user._id, {
+            affiliateCode,
+            affiliateEarnings: 0,
+        });
+        const payload = {
+            _id: user._id,
+            email: user.email,
+            role: user.role,
+        };
+        const { accessToken } = await this.createTokens(payload);
+        const updatedUser = await this.userService.findOne({ _id: user._id });
+        return {
+            message: 'Affiliate registration successful',
+            token: accessToken,
+            user: {
+                id: updatedUser._id,
+                firstname: updatedUser.firstname,
+                lastname: updatedUser.lastname,
+                email: updatedUser.email,
+                phonenumber: updatedUser.phonenumber,
+                role: updatedUser.role,
+                affiliateCode: updatedUser.affiliateCode,
+            },
+        };
+    }
+    async affiliateLogin(dto) {
+        const user = await this.userService.findOne({
+            email: dto.email.toLowerCase(),
+        });
+        console.log('user', user);
+        if (!user || user.role !== user_enum_1.RoleEnum.AFFILIATE) {
+            throw new common_1.NotFoundException('Invalid email/password provided.');
+        }
+        const passwordMatch = await this.comparePassword(dto.password, user.password);
+        if (!passwordMatch) {
+            throw new common_1.NotFoundException('Invalid email/password provided.');
+        }
+        const payload = {
+            _id: user._id,
+            email: user.email,
+            role: user.role,
+        };
+        const { accessToken } = await this.createTokens(payload);
+        return {
+            message: 'Login successful',
+            token: accessToken,
+            user: {
+                id: user._id,
+                name: user.firstname,
+                email: user.email,
+                phonenumber: user.phonenumber,
+                role: user.role,
+                affiliateCode: user.affiliateCode,
+            },
+        };
     }
 };
 AuthService = __decorate([

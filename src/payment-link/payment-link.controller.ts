@@ -30,6 +30,7 @@ import { RoleEnum } from 'src/user/user.enum';
 import { PaymentLinkStateEnum } from './payment-link.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ViewPaymentDto } from 'src/payment/dto/view-payment.dto';
+import { AffiliateSettingsDto } from './dto/affiliate-settings.dto';
 
 @Controller('payment-link')
 export class PaymentLinkController extends CoreController {
@@ -154,5 +155,27 @@ export class PaymentLinkController extends CoreController {
   ) {
     const resp = await this.paymentLinkService.singlePaymentLink(code);
     return this.responseSuccess(res, '00', 'Success', resp, HttpStatus.OK);
+  }
+
+  @Put('/:code/affiliate-settings')
+  @UseGuards(AuthGuard)
+  async updateAffiliateSettings(
+    @Param('code') code: string,
+    @Body() dto: AffiliateSettingsDto,
+    @CurrentUser() currentUser: IJWTUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const updatedLink = await this.paymentLinkService.updateAffiliateSettings(
+      code,
+      dto,
+      currentUser._id,
+    );
+    return this.responseSuccess(
+      res,
+      '00',
+      'Affiliate settings updated successfully',
+      updatedLink,
+      HttpStatus.OK,
+    );
   }
 }
